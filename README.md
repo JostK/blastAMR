@@ -26,10 +26,6 @@ This repository extracts library parts from [blastFoam](https://github.com/synth
 
 To get started, you can visit the one and only [wiki page](https://github.com/STFS-TUDa/blastAMR/wiki).
 
-> [!NOTE]
-> If you're using OpenFOAM v2206 or newer, please switch to the `v2212` branch. The `master` branch is for OpenFOAM v2112
-> and earlier versions for now. See #6.
-
 ## Objectives
 
 - Have a reasonable Load-balanced AMR for 2D/3D OpenFOAM meshes in the **ESI fork**.
