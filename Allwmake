@@ -25,6 +25,7 @@ else
     echo "${WM_PROJECT}-${foamv} is not supported, this toolkit only works with OpenCFD's releases of OpenFOAM."
     exit 1
 fi
+fi
 
 #------------------------------------------------------------------------------
 
