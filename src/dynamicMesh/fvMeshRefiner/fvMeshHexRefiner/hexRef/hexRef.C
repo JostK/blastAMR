@@ -700,7 +700,7 @@ void Foam::hexRef::walkFaceFromMid
 Foam::label Foam::hexRef::faceConsistentRefinement
 (
     const bool maxSet,
-    boolList& refineCell
+    bitSet& refineCell
 ) const
 {
     label nChanged = 0;
@@ -1410,12 +1410,7 @@ Foam::labelList Foam::hexRef::consistentRefinement
     // maxSet = false : unselect cells to refine
     // maxSet = true  : select cells to refine
 
-    // Go to straight boolList.
-    boolList refineCell(mesh_.nCells());
-    forAll(cellsToRefine, i)
-    {
-        refineCell.set(cellsToRefine[i]);
-    }
+   bitSet refineCell(mesh_.nCells(), cellsToRefine);
 
     while (true)
     {
@@ -1438,26 +1433,7 @@ Foam::labelList Foam::hexRef::consistentRefinement
 
 
     // Convert back to labelList.
-    label nRefined = 0;
-
-    forAll(refineCell, celli)
-    {
-        if (refineCell.get(celli))
-        {
-            nRefined++;
-        }
-    }
-
-    labelList newCellsToRefine(nRefined);
-    nRefined = 0;
-
-    forAll(refineCell, celli)
-    {
-        if (refineCell.get(celli))
-        {
-            newCellsToRefine[nRefined++] = celli;
-        }
-    }
+    labelList newCellsToRefine(refineCell.toc());
 
     if (debug)
     {
@@ -1965,6 +1941,10 @@ Foam::labelList Foam::hexRef::consistentSlowRefinement2
     const labelList& facesToCheck
 ) const
 {
+    FatalErrorInFunction
+        << "JK I have commented this function out"
+        << abort(FatalError);
+    /*
     const labelList& faceOwner = mesh_.faceOwner();
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
@@ -2379,6 +2359,7 @@ Foam::labelList Foam::hexRef::consistentSlowRefinement2
     }
 
     return newCellsToRefine;
+    */
 }
 
 
