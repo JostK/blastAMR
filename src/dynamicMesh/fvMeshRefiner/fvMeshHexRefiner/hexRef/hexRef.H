@@ -260,7 +260,7 @@ protected:
         label faceConsistentRefinement
         (
             const bool maxSet,
-            boolList& refineCell
+            bitSet& refineCell
         ) const;
 
         //- Check wanted refinement for 2:1 consistency

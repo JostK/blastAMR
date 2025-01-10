@@ -1743,34 +1743,23 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
     // maxSet = false : unselect points to refine
     // maxSet = true: select points to refine
 
-    // Maintain boolList for pointsToUnrefine and cellsToUnrefine
-    boolList unrefinePoint(mesh_.nPoints());
-
-    forAll(pointsToUnrefine, i)
-    {
-        label pointi = pointsToUnrefine[i];
-
-        unrefinePoint.set(pointi);
-    }
-
+    // Maintain bitset for pointsToUnrefine and cellsToUnrefine
+    bitSet unrefinePoint(mesh_.nPoints(), pointsToUnrefine);
 
     while (true)
     {
         // Construct cells to unrefine
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        boolList unrefineCell(mesh_.nCells());
+        bitSet unrefineCell(mesh_.nCells());
 
         forAll(unrefinePoint, pointi)
         {
-            if (unrefinePoint.get(pointi))
+            if (unrefinePoint.test(pointi))
             {
                 const labelList& pCells = mesh_.pointCells(pointi);
 
-                forAll(pCells, j)
-                {
-                    unrefineCell.set(pCells[j]);
-                }
+                unrefineCell.set(pCells);
             }
         }
 
@@ -1808,7 +1797,7 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
                     //         << "problem cell already unset"
                     //         << abort(FatalError);
                     // }
-                    if (unrefineCell.get(own) == 0)
+                    if (!unrefineCell.test(own))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -1826,7 +1815,7 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
                 }
                 else
                 {
-                    if (unrefineCell.get(nei) == 0)
+                    if (!unrefineCell.test(nei))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -1862,7 +1851,7 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
             {
                 if (!maxSet)
                 {
-                    if (unrefineCell.get(own) == 0)
+                    if (!unrefineCell.test(own))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -1876,7 +1865,7 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
             {
                 if (maxSet)
                 {
-                    if (unrefineCell.get(own) == 1)
+                    if (unrefineCell.test(own))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -1910,13 +1899,13 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
         // Knock out any point whose cell neighbour cannot be unrefined.
         forAll(unrefinePoint, pointi)
         {
-            if (unrefinePoint.get(pointi))
+            if (unrefinePoint.test(pointi))
             {
                 const labelList& pCells = mesh_.pointCells(pointi);
 
                 forAll(pCells, j)
                 {
-                    if (!unrefineCell.get(pCells[j]))
+                    if (!unrefineCell.test(pCells[j]))
                     {
                         unrefinePoint.unset(pointi);
                         break;
@@ -1932,7 +1921,7 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
 
     forAll(unrefinePoint, pointi)
     {
-        if (unrefinePoint.get(pointi))
+        if (unrefinePoint.test(pointi))
         {
             nSet++;
         }
@@ -1943,7 +1932,7 @@ Foam::labelList Foam::hexRef3D::consistentUnrefinement
 
     forAll(unrefinePoint, pointi)
     {
-        if (unrefinePoint.get(pointi))
+        if (unrefinePoint.test(pointi))
         {
             newPointsToUnrefine[nSet++] = pointi;
         }

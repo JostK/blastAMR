@@ -766,6 +766,7 @@ Foam::labelList Foam::refinement::consistentRefinement
     // iteration and number of iterations
     label nChanged = 0;
 
+    // JKTODO this can end in an endless loop
     while (true)
     {
         // Check for 2:1 face based consistent refinement. Updates cellsToRefine
