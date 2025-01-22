@@ -273,6 +273,9 @@ bool Foam::fvMeshRefiner::preUpdate()
 
 bool Foam::fvMeshRefiner::canRefine(const bool incr) const
 {
+    // JK TODO reset topoChanging to false each time step
+    mesh_.topoChanging(false);
+    
     const Time& t = mesh_.time();
     // force refinement on first timestep
     if (t.timeIndex() <= 1)

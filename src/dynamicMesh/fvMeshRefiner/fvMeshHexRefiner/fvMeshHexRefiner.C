@@ -1667,7 +1667,7 @@ bool Foam::fvMeshHexRefiner::refine
             hasChanged = true;
         }
 
-        mesh_.topoChanging(hasChanged);
+        mesh_.topoChanging(hasChanged); // NOTE this is never set back to false
         if (hasChanged)
         {
             // Reset moving flag (if any). If not using inflation we'll not
