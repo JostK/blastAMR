@@ -194,6 +194,12 @@ Foam::fvMeshHexRefiner::refine
 
     // Create mesh (with inflation), return map from old to new mesh.
     //autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, true);
+
+    // Clear moving flag. This is currently required since geometry calculation
+    // might get triggered when doing processor patches.
+    // (TBD: should be in changeMesh if no inflation?)
+    mesh_.moving(false);
+    // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false);
 
     Info<< "Refined from "
@@ -224,8 +230,26 @@ Foam::fvMeshHexRefiner::refine
     //    cellTreePtr_.clear();
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh_.updateMesh(*map);
 
+    // Move mesh
+    /*
+    pointField newPoints;
+    if (map().hasMotionPoints())
+    {
+        newPoints = map().preMotionPoints();
+    }
+    else
+    {
+        newPoints = points();
+    }
+    movePoints(newPoints);
+    */
+    
+    // JK TODO ?
+    // Update numbering of cells/vertices.
+//     meshCutter_.updateMesh(*map);
+    
     // Update numbering of protectedCell_
     if (protectedCell_.size())
     {
@@ -270,6 +294,12 @@ Foam::fvMeshHexRefiner::unrefine
 
     // Change mesh and generate map.
     //autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, true);
+
+    // Clear moving flag. This is currently required since geometry calculation
+    // might get triggered when doing processor patches.
+    // (TBD: should be in changeMesh if no inflation?)
+    mesh_.moving(false);
+    // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false);
 
     Info<< "Unrefined from "
@@ -278,8 +308,31 @@ Foam::fvMeshHexRefiner::unrefine
         << endl;
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh_.updateMesh(*map);
+    
+    // Move mesh
+    /*
+    pointField newPoints;
+    if (map().hasMotionPoints())
+    {
+        newPoints = map().preMotionPoints();
+    }
+    else
+    {
+        newPoints = points();
+    }
+    movePoints(newPoints);
+    */
+    
+    
+    // JK TODO 
+    // Correct the flux for modified faces.
+    
 
+    // JK TODO ?
+    // Update numbering of cells/vertices.
+//     meshCutter_.updateMesh(*map);
+    
     // Update numbering of protectedCell_
     if (protectedCell_.size())
     {
