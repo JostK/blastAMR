@@ -534,14 +534,10 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
+    // TODO only needed if pointFields are present
     // Self-contained pointMesh for reading pointFields
     const pointMesh oldPointMesh(mesh_);
-
-    // Track how many (if any) pointFields are read/mapped
-    label nPointFields = 0;
-
     refPtr<fileOperation> noWriteHandler;
-
     parPointFieldDistributor pointDistributor
     (
         oldPointMesh,   // source mesh
@@ -549,6 +545,7 @@ Foam::fvMeshBalance::distribute()
         //false           // Do not write
         noWriteHandler    // Do not write
     );
+    pointDistributor.saveMeshPoints();
     
     //Correct values on all coupled patches
     correctBoundaries<volScalarField>();
@@ -607,7 +604,22 @@ Foam::fvMeshBalance::distribute()
 
     blastMeshObject::distribute<fvMesh>(mesh_, map());
 
-
+    // TODO only needed if pointFields are present
+    PtrList<pointScalarField> pointScalarFields;
+    PtrList<pointVectorField> pointVectorFields;
+    PtrList<pointTensorField> pointTensorFields;
+    PtrList<pointSphericalTensorField> pointSphTensorFields;
+    PtrList<pointSymmTensorField> pointSymmTensorFields;
+    
+    // Construct new pointMesh from distributed mesh
+    const pointMesh& newPointMesh = pointMesh::New(mesh);
+    pointDistributor.resetTarget(newPointMesh, distMap());
+    pointDistributor.distributeAndStore(pointScalarFields);
+    pointDistributor.distributeAndStore(pointVectorFields);
+    pointDistributor.distributeAndStore(pointSphTensorFields);
+    pointDistributor.distributeAndStore(pointSymmTensorFields);
+    pointDistributor.distributeAndStore(pointTensorFields);
+    
     //Correct values on all coupled patches
     correctBoundaries<volScalarField>();
     correctBoundaries<volVectorField>();
