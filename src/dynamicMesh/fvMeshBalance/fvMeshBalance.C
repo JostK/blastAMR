@@ -547,6 +547,7 @@ Foam::fvMeshBalance::distribute()
     blastMeshObject::preDistribute<fvMesh>(mesh_);
 
     Info<< "Distributing the mesh ..." << endl;
+    mesh_.moving(false);
     balancing = true;
     autoPtr<mapDistributePolyMesh> map =
         distributor_.distribute(distribution_);
