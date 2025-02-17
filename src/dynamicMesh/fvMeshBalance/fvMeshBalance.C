@@ -531,18 +531,39 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-    //Correct values on all coupled patches
-    correctBoundaries<volScalarField>();
-    correctBoundaries<volVectorField>();
-    correctBoundaries<volSphericalTensorField>();
-    correctBoundaries<volSymmTensorField>();
-    correctBoundaries<volTensorField>();
+    // Get other side of processor boundaries
+    do
+    {
+        #undef  doCorrectCoupled
+        #define doCorrectCoupled(FieldType)  \
+        correctCoupledBoundaryConditions<processorFvPatch, FieldType>(mesh);
 
-    correctBoundaries<pointScalarField>();
-    correctBoundaries<pointVectorField>();
-    correctBoundaries<pointSphericalTensorField>();
-    correctBoundaries<pointSymmTensorField>();
-    correctBoundaries<pointTensorField>();
+        doCorrectCoupled(volScalarField);
+        doCorrectCoupled(volVectorField);
+        doCorrectCoupled(volSphericalTensorField);
+        doCorrectCoupled(volSymmTensorField);
+        doCorrectCoupled(volTensorField);
+        #undef doCorrectCoupled
+    }
+    while (false);
+
+    // No update surface fields
+
+
+    // Map pointFields
+    if (nPointFields)
+    {
+        // Construct new pointMesh from distributed mesh
+        const pointMesh& newPointMesh = pointMesh::New(mesh);
+
+        pointDistributor.resetTarget(newPointMesh, distMap());
+
+        pointDistributor.distributeAndStore(pointScalarFields);
+        pointDistributor.distributeAndStore(pointVectorFields);
+        pointDistributor.distributeAndStore(pointSphTensorFields);
+        pointDistributor.distributeAndStore(pointSymmTensorFields);
+        pointDistributor.distributeAndStore(pointTensorFields);
+    }
 
     blastMeshObject::preDistribute<fvMesh>(mesh_);
 
@@ -576,18 +597,39 @@ Foam::fvMeshBalance::distribute()
     blastMeshObject::distribute<fvMesh>(mesh_, map());
 
 
-    //Correct values on all coupled patches
-    correctBoundaries<volScalarField>();
-    correctBoundaries<volVectorField>();
-    correctBoundaries<volSphericalTensorField>();
-    correctBoundaries<volSymmTensorField>();
-    correctBoundaries<volTensorField>();
+    // Get other side of processor boundaries
+    do
+    {
+        #undef  doCorrectCoupled
+        #define doCorrectCoupled(FieldType)  \
+        correctCoupledBoundaryConditions<processorFvPatch, FieldType>(mesh);
 
-    correctBoundaries<pointScalarField>();
-    correctBoundaries<pointVectorField>();
-    correctBoundaries<pointSphericalTensorField>();
-    correctBoundaries<pointSymmTensorField>();
-    correctBoundaries<pointTensorField>();
+        doCorrectCoupled(volScalarField);
+        doCorrectCoupled(volVectorField);
+        doCorrectCoupled(volSphericalTensorField);
+        doCorrectCoupled(volSymmTensorField);
+        doCorrectCoupled(volTensorField);
+        #undef doCorrectCoupled
+    }
+    while (false);
+
+    // No update surface fields
+
+
+    // Map pointFields
+    if (nPointFields)
+    {
+        // Construct new pointMesh from distributed mesh
+        const pointMesh& newPointMesh = pointMesh::New(mesh);
+
+        pointDistributor.resetTarget(newPointMesh, distMap());
+
+        pointDistributor.distributeAndStore(pointScalarFields);
+        pointDistributor.distributeAndStore(pointVectorFields);
+        pointDistributor.distributeAndStore(pointSphTensorFields);
+        pointDistributor.distributeAndStore(pointSymmTensorFields);
+        pointDistributor.distributeAndStore(pointTensorFields);
+    }
 
     return map;
 }
