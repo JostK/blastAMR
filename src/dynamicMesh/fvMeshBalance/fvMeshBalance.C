@@ -544,16 +544,16 @@ Foam::fvMeshBalance::distribute()
     // Check processors have meshes
     // - check for 'faces' file (polyMesh)
     // - check for 'faceLabels' file (faMesh)
-    boolList volMeshOnProc;
+//     boolList volMeshOnProc;
 //     boolList areaMeshOnProc;
     
-    // All check if can read 'faces' file
-    volMeshOnProc = haveMeshFile
-    (
-        runTime,
-        volMeshMasterInstance/volMeshSubDir,
-        "faces"
-    );
+//     // All check if can read 'faces' file
+//     volMeshOnProc = haveMeshFile
+//     (
+//         runTime,
+//         volMeshMasterInstance/volMeshSubDir,
+//         "faces"
+//     );
 //     
 //     // Create 0 sized mesh to do all the generation of zero sized
 //     // fields on processors that have zero sized meshes. Note that this is
