@@ -598,7 +598,7 @@ Foam::fvMeshBalance::distribute()
         fieldsDistributor::readFields                                     \
         (                                                                 \
              oldPointMesh,                                                \
-             objects, Storage,                                            \
+             objects, Storage                                             \
         );                                                                \
         nPointFields += Storage.size();                                   \
     }
