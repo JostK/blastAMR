@@ -627,11 +627,11 @@ Foam::fvMeshBalance::distribute()
     correctBoundaries<volSymmTensorField>();
     correctBoundaries<volTensorField>();
 
-    correctBoundaries<pointScalarField>();
-    correctBoundaries<pointVectorField>();
-    correctBoundaries<pointSphericalTensorField>();
-    correctBoundaries<pointSymmTensorField>();
-    correctBoundaries<pointTensorField>();
+//     correctBoundaries<pointScalarField>();
+//     correctBoundaries<pointVectorField>();
+//     correctBoundaries<pointSphericalTensorField>();
+//     correctBoundaries<pointSymmTensorField>();
+//     correctBoundaries<pointTensorField>();
 
     blastMeshObject::preDistribute<fvMesh>(mesh_);
     
@@ -695,11 +695,11 @@ Foam::fvMeshBalance::distribute()
     correctBoundaries<volSymmTensorField>();
     correctBoundaries<volTensorField>();
 
-    correctBoundaries<pointScalarField>();
-    correctBoundaries<pointVectorField>();
-    correctBoundaries<pointSphericalTensorField>();
-    correctBoundaries<pointSymmTensorField>();
-    correctBoundaries<pointTensorField>();
+//     correctBoundaries<pointScalarField>();
+//     correctBoundaries<pointVectorField>();
+//     correctBoundaries<pointSphericalTensorField>();
+//     correctBoundaries<pointSymmTensorField>();
+//     correctBoundaries<pointTensorField>();
 
     return map;
 }
