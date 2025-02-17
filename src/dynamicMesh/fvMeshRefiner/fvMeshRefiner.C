@@ -628,6 +628,7 @@ bool Foam::fvMeshRefiner::balance()
     // Part 2 - Load Balancing
     if (canBalance(true))
     {
+        mesh_.moving(false);
         isBalancing_ = true;
 
         //- Save the old volumes so it will be distributed and
