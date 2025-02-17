@@ -34,6 +34,7 @@ License
 #include "preserveBafflesConstraint.H"
 
 #include "faMeshesRegistry.H"
+#include "parPointFieldDistributor.H"
 
 using namespace Foam::decompositionConstraints;
 
