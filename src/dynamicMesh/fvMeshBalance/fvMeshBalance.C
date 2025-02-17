@@ -531,48 +531,40 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-    // Get other side of processor boundaries
-    do
-    {
-        #undef  doCorrectCoupled
-        #define doCorrectCoupled(FieldType)  \
-        correctCoupledBoundaryConditions<processorFvPatch, FieldType>(mesh);
+    //Correct values on all coupled patches
+    correctBoundaries<volScalarField>();
+    correctBoundaries<volVectorField>();
+    correctBoundaries<volSphericalTensorField>();
+    correctBoundaries<volSymmTensorField>();
+    correctBoundaries<volTensorField>();
 
-        doCorrectCoupled(volScalarField);
-        doCorrectCoupled(volVectorField);
-        doCorrectCoupled(volSphericalTensorField);
-        doCorrectCoupled(volSymmTensorField);
-        doCorrectCoupled(volTensorField);
-        #undef doCorrectCoupled
-    }
-    while (false);
-
-    // No update surface fields
-
-
-    // Map pointFields
-    if (nPointFields)
-    {
-        // Construct new pointMesh from distributed mesh
-        const pointMesh& newPointMesh = pointMesh::New(mesh);
-
-        pointDistributor.resetTarget(newPointMesh, distMap());
-
-        pointDistributor.distributeAndStore(pointScalarFields);
-        pointDistributor.distributeAndStore(pointVectorFields);
-        pointDistributor.distributeAndStore(pointSphTensorFields);
-        pointDistributor.distributeAndStore(pointSymmTensorFields);
-        pointDistributor.distributeAndStore(pointTensorFields);
-    }
+    correctBoundaries<pointScalarField>();
+    correctBoundaries<pointVectorField>();
+    correctBoundaries<pointSphericalTensorField>();
+    correctBoundaries<pointSymmTensorField>();
+    correctBoundaries<pointTensorField>();
 
     blastMeshObject::preDistribute<fvMesh>(mesh_);
+
+    // If faMeshesRegistry exists, it is also owned by the polyMesh and will
+    // be destroyed by clearGeom() in fvMeshDistribute::distribute()
+    //
+    // Rescue faMeshesRegistry from destruction by temporarily moving
+    // it to be locally owned.
+    std::unique_ptr<faMeshesRegistry> faMeshesRegistry_saved
+    (
+        faMeshesRegistry::Release(mesh)
+    );
 
     Info<< "Distributing the mesh ..." << endl;
     balancing = true;
     autoPtr<mapDistributePolyMesh> map =
         distributor_.distribute(distribution_);
     balancing = false;
-
+    
+    // Restore ownership onto the polyMesh
+    faMeshesRegistry::Store(std::move(faMeshesRegistry_saved));
+    
     Info << "Successfully distributed mesh" << endl;
     label procLoadNew(mesh_.nCells());
     label overallLoadNew(returnReduce(procLoadNew, sumOp<label>()));
@@ -597,39 +589,18 @@ Foam::fvMeshBalance::distribute()
     blastMeshObject::distribute<fvMesh>(mesh_, map());
 
 
-    // Get other side of processor boundaries
-    do
-    {
-        #undef  doCorrectCoupled
-        #define doCorrectCoupled(FieldType)  \
-        correctCoupledBoundaryConditions<processorFvPatch, FieldType>(mesh);
+    //Correct values on all coupled patches
+    correctBoundaries<volScalarField>();
+    correctBoundaries<volVectorField>();
+    correctBoundaries<volSphericalTensorField>();
+    correctBoundaries<volSymmTensorField>();
+    correctBoundaries<volTensorField>();
 
-        doCorrectCoupled(volScalarField);
-        doCorrectCoupled(volVectorField);
-        doCorrectCoupled(volSphericalTensorField);
-        doCorrectCoupled(volSymmTensorField);
-        doCorrectCoupled(volTensorField);
-        #undef doCorrectCoupled
-    }
-    while (false);
-
-    // No update surface fields
-
-
-    // Map pointFields
-    if (nPointFields)
-    {
-        // Construct new pointMesh from distributed mesh
-        const pointMesh& newPointMesh = pointMesh::New(mesh);
-
-        pointDistributor.resetTarget(newPointMesh, distMap());
-
-        pointDistributor.distributeAndStore(pointScalarFields);
-        pointDistributor.distributeAndStore(pointVectorFields);
-        pointDistributor.distributeAndStore(pointSphTensorFields);
-        pointDistributor.distributeAndStore(pointSymmTensorFields);
-        pointDistributor.distributeAndStore(pointTensorFields);
-    }
+    correctBoundaries<pointScalarField>();
+    correctBoundaries<pointVectorField>();
+    correctBoundaries<pointSphericalTensorField>();
+    correctBoundaries<pointSymmTensorField>();
+    correctBoundaries<pointTensorField>();
 
     return map;
 }
