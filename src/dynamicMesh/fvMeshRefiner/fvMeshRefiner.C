@@ -691,9 +691,17 @@ void Foam::fvMeshRefiner::updateMesh(const mapPolyMesh& mpm)
         //  THIS IS A PRIVATE FUNCTION OF fvMesh,
         //  but we use a MACRO hack to make it accessible
         mesh_.clearGeom();
+    }
+    else
+    {
+        mesh_.clearGeomNotOldVol();
+        
+    }
+    
         
         if (V0OldPtr_)
         {
+            Info << "MOIN" << endl;
             if (mesh_.V0Ptr_)
             {
                 deleteDemandDrivenData(mesh_.V0Ptr_);
@@ -710,11 +718,6 @@ void Foam::fvMeshRefiner::updateMesh(const mapPolyMesh& mpm)
             mesh_.V00Ptr_ = V00OldPtr_;
             V00OldPtr_ = nullptr;
         }
-    }
-    else
-    {
-        mesh_.clearGeomNotOldVol();
-    }
 }
 
 
