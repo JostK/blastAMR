@@ -544,7 +544,8 @@ Foam::fvMeshBalance::distribute()
     // Check processors have meshes
     // - check for 'faces' file (polyMesh)
     // - check for 'faceLabels' file (faMesh)
-//     boolList volMeshOnProc;
+    boolList volMeshOnProc;
+    volMeshOnProc.setSize(UPstream::nProcs(), true);
 //     boolList areaMeshOnProc;
     
 //     // All check if can read 'faces' file
@@ -597,9 +598,12 @@ Foam::fvMeshBalance::distribute()
     {                                                                     \
         fieldsDistributor::readFields                                     \
         (                                                                 \
-             oldPointMesh,                                                \
-             objects, Storage,                                             \
-            false  /* readOldTime = false */                      \
+             volMeshOnProc, \
+            nullptr,                            \
+            oldPointMesh,                                                \
+             objects,                               \
+            Storage,                                             \
+            true  /* (deregister field) */                      \
         );                                                                \
         nPointFields += Storage.size();                                   \
     }
