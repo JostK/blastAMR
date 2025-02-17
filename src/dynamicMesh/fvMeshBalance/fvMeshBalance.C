@@ -534,6 +534,22 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
+    // Self-contained pointMesh for reading pointFields
+    const pointMesh oldPointMesh(mesh_);
+
+    // Track how many (if any) pointFields are read/mapped
+    label nPointFields = 0;
+
+    refPtr<fileOperation> noWriteHandler;
+
+    parPointFieldDistributor pointDistributor
+    (
+        oldPointMesh,   // source mesh
+        false,          // savePoints=false (ie, delay until later)
+        //false           // Do not write
+        noWriteHandler    // Do not write
+    );
+    
     //Correct values on all coupled patches
     correctBoundaries<volScalarField>();
     correctBoundaries<volVectorField>();
@@ -548,7 +564,7 @@ Foam::fvMeshBalance::distribute()
     correctBoundaries<pointTensorField>();
 
     blastMeshObject::preDistribute<fvMesh>(mesh_);
-
+    
     // If faMeshesRegistry exists, it is also owned by the polyMesh and will
     // be destroyed by clearGeom() in fvMeshDistribute::distribute()
     //
