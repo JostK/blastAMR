@@ -600,7 +600,6 @@ Foam::fvMeshBalance::distribute()
              oldPointMesh,                                                \
              objects, Storage,                                             \
             false  /* readOldTime = false */                      \
-
         );                                                                \
         nPointFields += Storage.size();                                   \
     }
