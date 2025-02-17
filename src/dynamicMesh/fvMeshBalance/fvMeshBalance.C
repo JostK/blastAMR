@@ -555,7 +555,7 @@ Foam::fvMeshBalance::distribute()
     // it to be locally owned.
     std::unique_ptr<faMeshesRegistry> faMeshesRegistry_saved
     (
-        faMeshesRegistry::Release(mesh)
+        faMeshesRegistry::Release(mesh_)
     );
 
     Info<< "Distributing the mesh ..." << endl;
