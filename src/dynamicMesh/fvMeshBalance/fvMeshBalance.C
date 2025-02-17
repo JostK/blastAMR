@@ -33,6 +33,8 @@ License
 #include "preservePatchesConstraint.H"
 #include "preserveBafflesConstraint.H"
 
+#include "faMeshesRegistry.H"
+
 using namespace Foam::decompositionConstraints;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
