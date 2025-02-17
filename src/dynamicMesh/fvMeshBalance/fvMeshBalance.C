@@ -35,6 +35,7 @@ License
 
 #include "faMeshesRegistry.H"
 #include "parPointFieldDistributor.H"
+#include "fieldsDistributor.H"
 
 using namespace Foam::decompositionConstraints;
 
@@ -534,7 +535,47 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-    // TODO only needed if pointFields are present
+    PtrList<pointScalarField> pointScalarFields;
+    PtrList<pointVectorField> pointVectorFields;
+    PtrList<pointTensorField> pointTensorFields;
+    PtrList<pointSphericalTensorField> pointSphTensorFields;
+    PtrList<pointSymmTensorField> pointSymmTensorFields;
+    
+//     // Check processors have meshes
+//     // - check for 'faces' file (polyMesh)
+//     // - check for 'faceLabels' file (faMesh)
+//     boolList volMeshOnProc;
+//     boolList areaMeshOnProc;
+//     
+//     // All check if can read 'faces' file
+//     volMeshOnProc = haveMeshFile
+//     (
+//         runTime,
+//         volMeshMasterInstance/volMeshSubDir,
+//         "faces"
+//     );
+//     
+//     // Create 0 sized mesh to do all the generation of zero sized
+//     // fields on processors that have zero sized meshes. Note that this is
+//     // only necessary on master but since polyMesh construction with
+//     // Pstream::parRun does parallel comms we have to do it on all
+//     // processors
+//     autoPtr<fvMeshSubset> subsetterPtr;
+// 
+//     // Missing a volume mesh somewhere?
+//     if (volMeshOnProc.found(false))
+//     {
+//         // A zero-sized mesh with boundaries.
+//         // This is used to create zero-sized fields.
+//         subsetterPtr.reset(new fvMeshSubset(mesh, zero{}));
+//         subsetterPtr().subMesh().init(true);
+//         subsetterPtr().subMesh().globalData();
+//         subsetterPtr().subMesh().tetBasePtIs();
+//         subsetterPtr().subMesh().geometricD();
+//     }
+//     
+  
+    
     // Self-contained pointMesh for reading pointFields
     const pointMesh oldPointMesh(mesh_);
     refPtr<fileOperation> noWriteHandler;
@@ -545,7 +586,39 @@ Foam::fvMeshBalance::distribute()
         //false           // Do not write
         noWriteHandler    // Do not write
     );
+    
+    IOobjectList objects = IOobjectList(mesh, runTime.timeName());
+    
+    
+    // pointFields
+    nPointFields = 0;
+
+    #define doFieldReading(Storage)                                       \
+    {                                                                     \
+        fieldsDistributor::readFields                                     \
+        (                                                                 \
+             oldPointMesh,                                                \
+             objects, Storage,                                            \
+        );                                                                \
+        nPointFields += Storage.size();                                   \
+    }
+
+    doFieldReading(pointScalarFields);
+    doFieldReading(pointVectorFields);
+    doFieldReading(pointSphTensorFields);
+    doFieldReading(pointSymmTensorFields);
+    doFieldReading(pointTensorFields);
+    #undef doFieldReading
+    
+    // TODO only needed if pointFields are present
     pointDistributor.saveMeshPoints();
+
+    
+    
+    
+    
+    
+    
     
     //Correct values on all coupled patches
     correctBoundaries<volScalarField>();
@@ -605,11 +678,6 @@ Foam::fvMeshBalance::distribute()
     blastMeshObject::distribute<fvMesh>(mesh_, map());
 
     // TODO only needed if pointFields are present
-    PtrList<pointScalarField> pointScalarFields;
-    PtrList<pointVectorField> pointVectorFields;
-    PtrList<pointTensorField> pointTensorFields;
-    PtrList<pointSphericalTensorField> pointSphTensorFields;
-    PtrList<pointSymmTensorField> pointSymmTensorFields;
     
     // Construct new pointMesh from distributed mesh
     const pointMesh& newPointMesh = pointMesh::New(mesh_);
