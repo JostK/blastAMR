@@ -587,11 +587,11 @@ Foam::fvMeshBalance::distribute()
         noWriteHandler    // Do not write
     );
     
-    IOobjectList objects = IOobjectList(mesh, runTime.timeName());
+    IOobjectList objects = IOobjectList(mesh_, mesh_.time().timeName());
     
     
     // pointFields
-    nPointFields = 0;
+    label nPointFields = 0;
 
     #define doFieldReading(Storage)                                       \
     {                                                                     \
