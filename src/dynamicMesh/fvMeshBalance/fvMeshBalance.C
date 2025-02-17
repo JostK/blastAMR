@@ -549,7 +549,8 @@ Foam::fvMeshBalance::distribute()
 //     boolList areaMeshOnProc;
 
     // Read handler on processors with a volMesh
-    refPtr<fileOperation> volMeshReadHandler = fileOperation::New(fileHandler(), volMeshOnProc, true);
+//     refPtr<fileOperation> volMeshReadHandler = fileOperation::New(fileHandler(), volMeshOnProc, true);
+    refPtr<fileOperation> noReadHandler;
     
 //     // All check if can read 'faces' file
 //     volMeshOnProc = haveMeshFile
@@ -601,7 +602,7 @@ Foam::fvMeshBalance::distribute()
         {                                                                     \
             fieldsDistributor::readFields                                     \
             (                                                                 \
-                volMeshOnProc, volMeshReadHandler, oldPointMesh,              \
+                volMeshOnProc, noReadHandler, oldPointMesh,              \
                 subsetterPtr, objects, Storage,                               \
                 true  /* (deregister field) */                                \
             );                                                                \
