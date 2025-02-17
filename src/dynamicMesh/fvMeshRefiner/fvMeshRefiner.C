@@ -634,7 +634,7 @@ bool Foam::fvMeshRefiner::balance()
         //  resized
         //  We cheat because so we can check which fields
         //  actually need to be mapped
-        Info << "HALLO1 " << mesh_.foundObject<volScalarField::Internal>("V0") << endl;
+//         Info << "HALLO1 " << mesh_.foundObject<volScalarField::Internal>("V0") << endl;
     
         if (mesh_.V0Ptr_)
         {
@@ -648,7 +648,7 @@ bool Foam::fvMeshRefiner::balance()
             mesh_.objectRegistry::store(V00OldPtr_);
             mesh_.V00Ptr_ = nullptr;
         }
-        Info << "HALLO2 " << mesh_.foundObject<volScalarField::Internal>("V0") << endl;
+//         Info << "HALLO2 " << mesh_.foundObject<volScalarField::Internal>("V0") << endl;
 
         //- Only clear old volumes if balancing is occurring
         //- Clear V, V0, and V00 since they are not
