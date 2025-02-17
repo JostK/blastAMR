@@ -613,7 +613,7 @@ Foam::fvMeshBalance::distribute()
     
     // Construct new pointMesh from distributed mesh
     const pointMesh& newPointMesh = pointMesh::New(mesh);
-    pointDistributor.resetTarget(newPointMesh, distMap());
+    pointDistributor.resetTarget(newPointMesh, map());
     pointDistributor.distributeAndStore(pointScalarFields);
     pointDistributor.distributeAndStore(pointVectorFields);
     pointDistributor.distributeAndStore(pointSphTensorFields);
