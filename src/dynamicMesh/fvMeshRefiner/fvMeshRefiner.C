@@ -645,7 +645,7 @@ bool Foam::fvMeshRefiner::balance()
         if (mesh_.V00Ptr_)
         {
             V00OldPtr_ = mesh_.V00Ptr_;
-            mesh_.objectRegistry::store(V00Ptr_);
+            mesh_.objectRegistry::store(V00OldPtr_);
             mesh_.V00Ptr_ = nullptr;
         }
         Info << "HALLO2 " << mesh_.foundObject<volScalarField::Internal>("V0") << endl;
