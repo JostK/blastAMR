@@ -594,24 +594,11 @@ Foam::fvMeshBalance::distribute()
     // pointFields
     label nPointFields = 0;
 
-    #define doFieldReading(Storage)                                       \
-    {                                                                     \
-        fieldsDistributor::readFields                                     \
-        (                                                                 \
-             volMeshOnProc, \
-            subsetterPtr,                            \
-            oldPointMesh,                                                \
-             objects,                               \
-            Storage,                                             \
-            true  /* (deregister field) */                      \
-        );                                                                \
-        nPointFields += Storage.size();                                   \
-    }
         #define doFieldReading(Storage)                                       \
         {                                                                     \
             fieldsDistributor::readFields                                     \
             (                                                                 \
-                volMeshOnProc, volMeshReadHandler, oldPointMesh,                     \
+                volMeshOnProc, noReadHandler, oldPointMesh,                     \
                 subsetterPtr, objects, Storage,                               \
                 true  /* (deregister field) */                                \
             );                                                                \
