@@ -561,7 +561,7 @@ Foam::fvMeshBalance::distribute()
 //     // only necessary on master but since polyMesh construction with
 //     // Pstream::parRun does parallel comms we have to do it on all
 //     // processors
-//     autoPtr<fvMeshSubset> subsetterPtr;
+    autoPtr<fvMeshSubset> subsetterPtr;
 // 
 //     // Missing a volume mesh somewhere?
 //     if (volMeshOnProc.found(false))
@@ -599,7 +599,7 @@ Foam::fvMeshBalance::distribute()
         fieldsDistributor::readFields                                     \
         (                                                                 \
              volMeshOnProc, \
-            nullptr,                            \
+            subsetterPtr,                            \
             oldPointMesh,                                                \
              objects,                               \
             Storage,                                             \
