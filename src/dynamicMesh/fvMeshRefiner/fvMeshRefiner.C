@@ -637,12 +637,12 @@ bool Foam::fvMeshRefiner::balance()
         if (mesh_.V0Ptr_)
         {
             V0OldPtr_ = mesh_.V0Ptr_;
-//             mesh_.V0Ptr_ = nullptr;
+            mesh_.V0Ptr_ = nullptr;
         }
         if (mesh_.V00Ptr_)
         {
             V00OldPtr_ = mesh_.V00Ptr_;
-//             mesh_.V00Ptr_ = nullptr;
+            mesh_.V00Ptr_ = nullptr;
         }
 
         //- Only clear old volumes if balancing is occurring
@@ -655,8 +655,7 @@ bool Foam::fvMeshRefiner::balance()
 
         //  THIS IS A PRIVATE FUNCTION OF fvMesh,
         //  but we use a MACRO hack to make it accessible
-//         mesh_.clearGeom();
-mesh_.clearGeomNotOldVol();
+        mesh_.clearGeom();
 
         Info<< "Mapping the fields ..." << endl;
         autoPtr<mapDistributePolyMesh> map = balancer_.distribute();
@@ -675,29 +674,28 @@ mesh_.clearGeomNotOldVol();
 
 void Foam::fvMeshRefiner::updateMesh(const mapPolyMesh& mpm)
 {
-//     if
-//     (
-//         mesh_.foundObject<volScalarField::Internal>("V0_Old")
-//      || mesh_.foundObject<volScalarField::Internal>("V00_Old")
-//     )
-//     {
-//         //- Only clear old volumes if balancing is occurring
-//         //- Clear V, V0, and V00 since they are not
-//         //  registered, and therefore are not resized and the
-//         //  normal mapping does not work.
-//         //  Instead we save V0/V00 and reset it.
-// 
-//         // The actual fix to this is in progress
-// 
-//         //  THIS IS A PRIVATE FUNCTION OF fvMesh,
-//         //  but we use a MACRO hack to make it accessible
-//         mesh_.clearGeom();
-//     }
-//     else
-//     {
-//         mesh_.clearGeomNotOldVol();
-//     }
-    mesh_.clearGeomNotOldVol();
+    if
+    (
+        mesh_.foundObject<volScalarField::Internal>("V0_Old")
+     || mesh_.foundObject<volScalarField::Internal>("V00_Old")
+    )
+    {
+        //- Only clear old volumes if balancing is occurring
+        //- Clear V, V0, and V00 since they are not
+        //  registered, and therefore are not resized and the
+        //  normal mapping does not work.
+        //  Instead we save V0/V00 and reset it.
+
+        // The actual fix to this is in progress
+
+        //  THIS IS A PRIVATE FUNCTION OF fvMesh,
+        //  but we use a MACRO hack to make it accessible
+        mesh_.clearGeom();
+    }
+    else
+    {
+        mesh_.clearGeomNotOldVol();
+    }
 }
 
 
