@@ -640,13 +640,13 @@ bool Foam::fvMeshRefiner::balance()
         {
             V0OldPtr_ = mesh_.V0Ptr_;
             mesh_.objectRegistry::store(V0OldPtr_);
-            mesh_.V0Ptr_ = nullptr;
+//             mesh_.V0Ptr_ = nullptr;
         }
         if (mesh_.V00Ptr_)
         {
             V00OldPtr_ = mesh_.V00Ptr_;
             mesh_.objectRegistry::store(V00OldPtr_);
-            mesh_.V00Ptr_ = nullptr;
+//             mesh_.V00Ptr_ = nullptr;
         }
         Info << "HALLO2 " << mesh_.foundObject<volScalarField::Internal>("V0") << endl;
 
@@ -660,7 +660,8 @@ bool Foam::fvMeshRefiner::balance()
 
         //  THIS IS A PRIVATE FUNCTION OF fvMesh,
         //  but we use a MACRO hack to make it accessible
-        mesh_.clearGeom();
+//         mesh_.clearGeom();
+         mesh_.clearGeomNotOldVol();
 
         Info<< "Mapping the fields ..." << endl;
         autoPtr<mapDistributePolyMesh> map = balancer_.distribute();
