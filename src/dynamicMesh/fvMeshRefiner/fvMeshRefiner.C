@@ -630,32 +630,33 @@ bool Foam::fvMeshRefiner::balance()
     {
         isBalancing_ = true;
 
-        //- Save the old volumes so it will be distributed and
-        //  resized
-        //  We cheat because so we can check which fields
-        //  actually need to be mapped
-        if (mesh_.V0Ptr_)
-        {
-            V0OldPtr_ = mesh_.V0Ptr_;
-            mesh_.V0Ptr_ = nullptr;
-        }
-        if (mesh_.V00Ptr_)
-        {
-            V00OldPtr_ = mesh_.V00Ptr_;
-            mesh_.V00Ptr_ = nullptr;
-        }
-
-        //- Only clear old volumes if balancing is occurring
-        //- Clear V, V0, and V00 since they are not
-        //  registered, and therefore are not resized and the
-        //  normal mapping does not work.
-        //  Instead we save V0/V00 and reset it.
-
-        // The actual fix to this is in progress
-
-        //  THIS IS A PRIVATE FUNCTION OF fvMesh,
-        //  but we use a MACRO hack to make it accessible
-        mesh_.clearGeom();
+//         //- Save the old volumes so it will be distributed and
+//         //  resized
+//         //  We cheat because so we can check which fields
+//         //  actually need to be mapped
+//         if (mesh_.V0Ptr_)
+//         {
+//             V0OldPtr_ = mesh_.V0Ptr_;
+//             mesh_.V0Ptr_ = nullptr;
+//         }
+//         if (mesh_.V00Ptr_)
+//         {
+//             V00OldPtr_ = mesh_.V00Ptr_;
+//             mesh_.V00Ptr_ = nullptr;
+//         }
+// 
+//         //- Only clear old volumes if balancing is occurring
+//         //- Clear V, V0, and V00 since they are not
+//         //  registered, and therefore are not resized and the
+//         //  normal mapping does not work.
+//         //  Instead we save V0/V00 and reset it.
+// 
+//         // The actual fix to this is in progress
+// 
+//         //  THIS IS A PRIVATE FUNCTION OF fvMesh,
+//         //  but we use a MACRO hack to make it accessible
+//         mesh_.clearGeom();
+        mesh_.clearGeomNotOldVol();
 
         Info<< "Mapping the fields ..." << endl;
         autoPtr<mapDistributePolyMesh> map = balancer_.distribute();
@@ -674,28 +675,29 @@ bool Foam::fvMeshRefiner::balance()
 
 void Foam::fvMeshRefiner::updateMesh(const mapPolyMesh& mpm)
 {
-    if
-    (
-        mesh_.foundObject<volScalarField::Internal>("V0_Old")
-     || mesh_.foundObject<volScalarField::Internal>("V00_Old")
-    )
-    {
-        //- Only clear old volumes if balancing is occurring
-        //- Clear V, V0, and V00 since they are not
-        //  registered, and therefore are not resized and the
-        //  normal mapping does not work.
-        //  Instead we save V0/V00 and reset it.
-
-        // The actual fix to this is in progress
-
-        //  THIS IS A PRIVATE FUNCTION OF fvMesh,
-        //  but we use a MACRO hack to make it accessible
-        mesh_.clearGeom();
-    }
-    else
-    {
-        mesh_.clearGeomNotOldVol();
-    }
+//     if
+//     (
+//         mesh_.foundObject<volScalarField::Internal>("V0_Old")
+//      || mesh_.foundObject<volScalarField::Internal>("V00_Old")
+//     )
+//     {
+//         //- Only clear old volumes if balancing is occurring
+//         //- Clear V, V0, and V00 since they are not
+//         //  registered, and therefore are not resized and the
+//         //  normal mapping does not work.
+//         //  Instead we save V0/V00 and reset it.
+// 
+//         // The actual fix to this is in progress
+// 
+//         //  THIS IS A PRIVATE FUNCTION OF fvMesh,
+//         //  but we use a MACRO hack to make it accessible
+//         mesh_.clearGeom();
+//     }
+//     else
+//     {
+//         mesh_.clearGeomNotOldVol();
+//     }
+    mesh_.clearGeomNotOldVol();
 }
 
 
@@ -714,26 +716,26 @@ void Foam::fvMeshRefiner::distribute
     //  not created until the time has advanced and asking for
     //  thermo though V0() or V00() results in a fatal error
 
-    if (V0OldPtr_)
-    {
-        map.distributeCellData(*V0OldPtr_);
-        if (mesh_.V0Ptr_)
-        {
-            deleteDemandDrivenData(mesh_.V0Ptr_);
-        }
-        mesh_.V0Ptr_ = V0OldPtr_;
-        V0OldPtr_ = nullptr;
-    }
-    if (V00OldPtr_)
-    {
-        map.distributeCellData(*V00OldPtr_);
-        if (mesh_.V00Ptr_)
-        {
-            deleteDemandDrivenData(mesh_.V0Ptr_);
-        }
-        mesh_.V00Ptr_ = V00OldPtr_;
-        V00OldPtr_ = nullptr;
-    }
+//     if (V0OldPtr_)
+//     {
+//         map.distributeCellData(*V0OldPtr_);
+//         if (mesh_.V0Ptr_)
+//         {
+//             deleteDemandDrivenData(mesh_.V0Ptr_);
+//         }
+//         mesh_.V0Ptr_ = V0OldPtr_;
+//         V0OldPtr_ = nullptr;
+//     }
+//     if (V00OldPtr_)
+//     {
+//         map.distributeCellData(*V00OldPtr_);
+//         if (mesh_.V00Ptr_)
+//         {
+//             deleteDemandDrivenData(mesh_.V0Ptr_);
+//         }
+//         mesh_.V00Ptr_ = V00OldPtr_;
+//         V00OldPtr_ = nullptr;
+//     }
 }
 
 
