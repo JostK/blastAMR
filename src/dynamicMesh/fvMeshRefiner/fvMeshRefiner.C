@@ -637,12 +637,12 @@ bool Foam::fvMeshRefiner::balance()
         if (mesh_.V0Ptr_)
         {
             V0OldPtr_ = mesh_.V0Ptr_;
-            mesh_.V0Ptr_ = nullptr;
+//             mesh_.V0Ptr_ = nullptr;
         }
         if (mesh_.V00Ptr_)
         {
             V00OldPtr_ = mesh_.V00Ptr_;
-            mesh_.V00Ptr_ = nullptr;
+//             mesh_.V00Ptr_ = nullptr;
         }
 
         //- Only clear old volumes if balancing is occurring
