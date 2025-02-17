@@ -695,29 +695,7 @@ void Foam::fvMeshRefiner::updateMesh(const mapPolyMesh& mpm)
     else
     {
         mesh_.clearGeomNotOldVol();
-        
     }
-    
-        
-        if (V0OldPtr_)
-        {
-            Info << "MOIN" << endl;
-            if (mesh_.V0Ptr_)
-            {
-                deleteDemandDrivenData(mesh_.V0Ptr_);
-            }
-            mesh_.V0Ptr_ = V0OldPtr_;
-            V0OldPtr_ = nullptr;
-        }
-        if (V00OldPtr_)
-        {
-            if (mesh_.V00Ptr_)
-            {
-                deleteDemandDrivenData(mesh_.V0Ptr_);
-            }
-            mesh_.V00Ptr_ = V00OldPtr_;
-            V00OldPtr_ = nullptr;
-        }
 }
 
 
