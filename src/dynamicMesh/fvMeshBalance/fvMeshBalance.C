@@ -583,13 +583,13 @@ Foam::fvMeshBalance::distribute()
     
     // Self-contained pointMesh for reading pointFields
     const pointMesh oldPointMesh(mesh_);
-    refPtr<fileOperation> noWriteHandler;
+//     refPtr<fileOperation> noWriteHandler; //TODO this is the problem
     parPointFieldDistributor pointDistributor
     (
         oldPointMesh,   // source mesh
         false,          // savePoints=false (ie, delay until later)
-        //false           // Do not write
-        noWriteHandler    // Do not write
+        false           // Do not write
+//         noWriteHandler    // Do not write
     );
     
     IOobjectList objects = IOobjectList(mesh_, mesh_.time().timeName());
