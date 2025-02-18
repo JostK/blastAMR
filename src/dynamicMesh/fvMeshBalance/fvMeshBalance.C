@@ -544,7 +544,7 @@ Foam::fvMeshBalance::distribute()
     Foam::label i = 0;
     for (const auto& entry : pointFieldsTable)
     {
-        pointScalarFields.set(i++, entry->second);  // entry.second is the pointer to the field
+        pointScalarFields.set(i++, entry().second);  // entry.second is the pointer to the field
     }
     Info << "HALLO 0 nPointScalarFields " <<  pointScalarFields.size() << endl;
     
