@@ -33,7 +33,6 @@ License
 #include "preservePatchesConstraint.H"
 #include "preserveBafflesConstraint.H"
 
-#include "pointFields.H"
 #include "faMeshesRegistry.H"
 #include "parFvFieldDistributor.H"
 #include "parPointFieldDistributor.H"
