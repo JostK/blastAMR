@@ -537,15 +537,13 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
     PtrList<pointScalarField> pointScalarFields;
-    PtrList<pointScalarField> pointScalarFields;
     PtrList<pointVectorField> pointVectorFields;
     PtrList<pointTensorField> pointTensorFields;
-    PtrList<pointSphTensorField> pointSphTensorFields;
     PtrList<pointSymmTensorField> pointSymmTensorFields;
 
     {
     const Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointScalarField>());
-    pointScalarFields.setSize(pointFieldsTable.size())
+    pointScalarFields.setSize(pointFieldsTable.size());
     Foam::label i = 0;
     for (const auto* fieldPtr : pointFieldsTable)  
     {
@@ -570,15 +568,15 @@ Foam::fvMeshBalance::distribute()
         pointTensorFields.set(i++,  const_cast<Foam::pointTensorField*>(fieldPtr));  
     }
     }
-    {
-    const Foam::HashTable<Foam::pointSphTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSphTensorField>());
-    pointSphTensorFields.setSize(pointFieldsTable.size());
-    Foam::label i = 0;
-    for (const auto* fieldPtr : pointFieldsTable)  
-    {
-        pointSphTensorFields.set(i++,  const_cast<Foam::pointSphTensorField*>(fieldPtr));  
-    }
-    }
+//     {
+//     const Foam::HashTable<Foam::pointSphTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSphTensorField>());
+//     pointSphTensorFields.setSize(pointFieldsTable.size());
+//     Foam::label i = 0;
+//     for (const auto* fieldPtr : pointFieldsTable)  
+//     {
+//         pointSphTensorFields.set(i++,  const_cast<Foam::pointSphTensorField*>(fieldPtr));  
+//     }
+//     }
     {
     const Foam::HashTable<Foam::pointSymmTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSymmTensorField>());
     pointSymmTensorFields.setSize(pointFieldsTable.size());
