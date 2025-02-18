@@ -536,7 +536,8 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-    PtrList<pointScalarField> pointScalarFields;
+//     PtrList<pointScalarField> pointScalarFields;
+     PtrList<pointScalarField>  pointScalarFields = mesh_.lookupClass<pointScalarField>()
     PtrList<pointVectorField> pointVectorFields;
     PtrList<pointTensorField> pointTensorFields;
     PtrList<pointSphericalTensorField> pointSphTensorFields;
