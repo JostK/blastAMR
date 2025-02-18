@@ -537,7 +537,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
 //     PtrList<pointScalarField> pointScalarFields;
-    const Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable = mesh_.lookupClass<Foam::pointScalarField>();
+    Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointScalarField>());
 
     Foam::PtrList<Foam::pointScalarField> pointScalarFields(pointFieldsTable.size());
 
