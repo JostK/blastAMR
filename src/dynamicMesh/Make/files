@@ -3,6 +3,7 @@ newRefinementIterator/newRefinementIterator.C
 
 locationMapper/locationMapper.C
 
+fvMeshBalance/parPointFieldDistributor.C
 fvMeshBalance/fvMeshBalance.C
 fvMeshRefiner/fvMeshRefiner.C
 fvMeshRefiner/fvMeshRefinerNew.C
