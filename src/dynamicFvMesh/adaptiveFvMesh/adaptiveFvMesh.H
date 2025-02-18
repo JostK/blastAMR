@@ -127,11 +127,36 @@ protected:
             //- Distribute additional information
             virtual void distribute(const mapDistributePolyMesh& map);
 
-            //- Map non-flux surface<Type>Fields for new internal faces
-            //  (from cell splitting)
+//             //- Map non-flux surface<Type>Fields for new internal faces
+//             //  (from cell splitting)
+//             template <class T>
+//             void mapNewInternalFaces(const labelList& faceMap)
+//             {}
+            
+            //- Map single non-flux surface<Type>Field
+            //  for new internal faces (e.g. AMR refine). This currently
+            //  interpolates values from surrounding faces (faces on
+            //  neighbouring cells) that do have a value.
             template <class T>
-            void mapNewInternalFaces(const labelList& faceMap)
-            {}
+            void mapNewInternalFaces
+            (
+                const labelList& faceMap,
+                GeometricField<T, fvsPatchField, surfaceMesh>&
+            );
+
+            //- Correct surface fields for new faces
+            template <class T>
+            void mapNewInternalFaces(const labelList& faceMap);
+
+            //- Correct surface fields for new faces. Converts any oriented
+            //  fields into non-oriented (i.e. phi -> Uf) before mapping
+            template <class T>
+            void mapNewInternalFaces
+            (
+                const surfaceVectorField& Sf,
+                const surfaceScalarField& magSf,
+                const labelList& faceMap
+            );
 
             bool firstUpdate();
 
@@ -198,6 +223,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "adaptiveFvMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

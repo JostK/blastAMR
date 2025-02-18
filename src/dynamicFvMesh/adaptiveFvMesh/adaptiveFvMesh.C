@@ -127,54 +127,61 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
         // Storage for any master faces. These will be the original faces
         // on the coarse cell that get split into four (or rather the
         // master face gets modified and three faces get added from the master)
-        labelHashSet masterFaces;
+        // Estimate number of faces created
+
+        bitSet masterFaces(nFaces());
 
         forAll(faceMap, facei)
         {
-            label oldFacei = faceMap[facei];
+            const label oldFacei = faceMap[facei];
 
             if (oldFacei >= 0)
             {
-                label masterFacei = reverseFaceMap[oldFacei];
+                const label masterFacei = reverseFaceMap[oldFacei];
 
                 if (masterFacei < 0)
                 {
                     FatalErrorInFunction
                         << "Problem: should not have removed faces"
                         << " when refining."
-                        << nl << "face:" << facei << abort(FatalError);
+                        << nl << "face:" << facei << endl
+                        << abort(FatalError);
                 }
                 else if (masterFacei != facei)
                 {
-                    masterFaces.insert(masterFacei);
+                    masterFaces.set(masterFacei);
                 }
             }
         }
+
         if (debug)
         {
-            Pout<< "Found " << masterFaces.size() << " split faces " << endl;
+            Pout<< "Found " << masterFaces.count() << " split faces " << endl;
         }
 
-        // Check if it's a flux field through dims
-        auto isFlux = [&](const surfaceScalarField& df)
-        {
-            return
-                df.dimensions() == dimArea*dimVelocity
-             || df.dimensions() == dimArea*dimVelocity*dimDensity;
-        };
         HashTable<surfaceScalarField*> fluxes
         (
             lookupClass<surfaceScalarField>()
         );
-        forAllIter(HashTable<surfaceScalarField*>, fluxes, iter)
-        {
 
-            if (!isFlux(*iter()))
-            {
-                continue;
-            }
+        // Remove surfaceInterpolation to allow re-calculation on demand
+        // This could be done in fvMesh::updateMesh but some dynamicFvMesh
+        // might need the old interpolation fields (weights, etc).
+        surfaceInterpolation::clearOut();
+
+        forAllIters(fluxes, iter)
+        {
             if (!correctFluxes_.found(iter.key()))
             {
+                WarningInFunction
+                    << "Cannot find surfaceScalarField " << iter.key()
+                    << " in user-provided flux mapping table "
+                    << correctFluxes_ << endl
+                    << "    The flux mapping table is used to recreate the"
+                    << " flux on newly created faces." << endl
+                    << "    Either add the entry if it is a flux or use ("
+                    << iter.key() << " none) to suppress this warning."
+                    << endl;
                 continue;
             }
 
@@ -185,12 +192,12 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
                 continue;
             }
 
+            surfaceScalarField& phi = *iter();
+
             if (UName == "NaN")
             {
                 Pout<< "Setting surfaceScalarField " << iter.key()
                     << " to NaN" << endl;
-
-                surfaceScalarField& phi = *iter();
 
                 sigFpe::fillNan(phi.primitiveFieldRef());
 
@@ -204,7 +211,6 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
                     << endl;
             }
 
-            surfaceScalarField& phi = *iter();
             const surfaceScalarField phiU
             (
                 fvc::interpolate
@@ -215,9 +221,9 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
             );
 
             // Recalculate new internal faces.
-            for (label facei = 0; facei < nInternalFaces(); facei++)
+            for (label facei = 0; facei < nInternalFaces(); ++facei)
             {
-                label oldFacei = faceMap[facei];
+                const label oldFacei = faceMap[facei];
 
                 if (oldFacei == -1)
                 {
@@ -232,8 +238,8 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
             }
 
             // Recalculate new boundary faces.
-            surfaceScalarField::Boundary& phiBf =
-                phi.boundaryFieldRef();
+            surfaceScalarField::Boundary& phiBf = phi.boundaryFieldRef();
+
             forAll(phiBf, patchi)
             {
                 fvsPatchScalarField& patchPhi = phiBf[patchi];
@@ -244,7 +250,7 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
 
                 forAll(patchPhi, i)
                 {
-                    label oldFacei = faceMap[facei];
+                    const label oldFacei = faceMap[facei];
 
                     if (oldFacei == -1)
                     {
@@ -257,34 +263,28 @@ void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
                         patchPhi[i] = patchPhiU[i];
                     }
 
-                    facei++;
+                    ++facei;
                 }
             }
 
             // Update master faces
-            forAllConstIter(labelHashSet, masterFaces, iter)
+            for (const label facei : masterFaces)
             {
-                label facei = iter.key();
-
                 if (isInternalFace(facei))
                 {
                     phi[facei] = phiU[facei];
                 }
                 else
                 {
-                    label patchi = boundaryMesh().whichPatch(facei);
+                    const label patchi = boundaryMesh().whichPatch(facei);
+                    const label i = facei - boundaryMesh()[patchi].start();
 
-                    if (!isA<emptyPolyPatch>(boundaryMesh()[patchi]))
-                    {
-                        label i = facei - boundaryMesh()[patchi].start();
+                    const fvsPatchScalarField& patchPhiU =
+                        phiU.boundaryField()[patchi];
 
-                        const fvsPatchScalarField& patchPhiU =
-                            phiU.boundaryField()[patchi];
+                    fvsPatchScalarField& patchPhi = phiBf[patchi];
 
-                        fvsPatchScalarField& patchPhi = phiBf[patchi];
-
-                        patchPhi[i] = patchPhiU[i];
-                    }
+                    patchPhi[i] = patchPhiU[i];
                 }
             }
         }
@@ -347,13 +347,131 @@ void Foam::adaptiveFvMesh::mapFields(const mapPolyMesh& mpm)
 {
     dynamicFvMesh::mapFields(mpm);
 
-    // Correct surface fields on introduced internal faces. These get
-    // created out-of-nothing so get an interpolated value.
-    mapNewInternalFaces<scalar>(mpm.faceMap());
-    mapNewInternalFaces<vector>(mpm.faceMap());
-    mapNewInternalFaces<sphericalTensor>(mpm.faceMap());
-    mapNewInternalFaces<symmTensor>(mpm.faceMap());
-    mapNewInternalFaces<tensor>(mpm.faceMap());
+    // Correct old-time volumes for refined/unrefined cells. We know at this
+    // point that the points have not moved and the cells have only been split
+    // or merged. We hope that dynamicMotionSolverListFvMesh::mapFields
+    // does not use old-time volumes ...
+    {
+        const labelList& cellMap = mpm.cellMap();
+        const labelList& reverseCellMap = mpm.reverseCellMap();
+
+        // Each split cell becomes original + 7 additional
+        labelList nSubCells(mpm.nOldCells(), 0);
+
+        forAll(cellMap, celli)
+        {
+            const label oldCelli = cellMap[celli];
+            if (oldCelli >= 0 && reverseCellMap[oldCelli] >= 0)
+            {
+                // Found master cell.
+                nSubCells[oldCelli]++;
+            }
+        }
+
+        // Start off from mapped old volumes
+        scalarField correctedV0(this->V0());
+
+        // Correct any split cells
+        const auto& V = this->V();
+        forAll(cellMap, celli)
+        {
+            const label oldCelli = cellMap[celli];
+            if (oldCelli >= 0 && nSubCells[oldCelli] == 8)
+            {
+                // Found split cell. Use current volume instead of mapped
+                // old one
+                correctedV0[celli] = V[celli];
+            }
+        }
+
+        const auto& cellsFromCells = mpm.cellsFromCellsMap();
+        for (const auto& s : cellsFromCells)
+        {
+            // Reset unsplit cell
+            const label celli = s.index();
+            correctedV0[celli] = V[celli];
+            //? Or sum up old volumes?
+            //const labelList& oldCells = s.masterObjects();
+            //for (const label oldCelli : oldCells)
+            //{
+            //}
+        }
+
+        setV0().field() = correctedV0;
+    }
+    
+    // JK Also correct old-old-time volumes for refined/unrefined cells. We know at this
+    // point that the points have not moved and the cells have only been split
+    // or merged. We hope that dynamicMotionSolverListFvMesh::mapFields
+    // does not use old-time volumes ...
+    {
+        const labelList& cellMap = mpm.cellMap();
+        const labelList& reverseCellMap = mpm.reverseCellMap();
+
+        // Each split cell becomes original + 7 additional
+        labelList nSubCells(mpm.nOldCells(), 0);
+
+        forAll(cellMap, celli)
+        {
+            const label oldCelli = cellMap[celli];
+            if (oldCelli >= 0 && reverseCellMap[oldCelli] >= 0)
+            {
+                // Found master cell.
+                nSubCells[oldCelli]++;
+            }
+        }
+
+        // Start off from mapped old volumes
+        scalarField correctedV00(this->V00());
+
+        // Correct any split cells
+        const auto& V = this->V();
+        forAll(cellMap, celli)
+        {
+            const label oldCelli = cellMap[celli];
+            if (oldCelli >= 0 && nSubCells[oldCelli] == 8)
+            {
+                // Found split cell. Use current volume instead of mapped
+                // old one
+                correctedV00[celli] = V[celli];
+            }
+        }
+
+        const auto& cellsFromCells = mpm.cellsFromCellsMap();
+        for (const auto& s : cellsFromCells)
+        {
+            // Reset unsplit cell
+            const label celli = s.index();
+            correctedV00[celli] = V[celli];
+            //? Or sum up old volumes?
+            //const labelList& oldCells = s.masterObjects();
+            //for (const label oldCelli : oldCells)
+            //{
+            //}
+        }
+        
+        // TODO setV00() does not exist, so you left me no choice
+        const_cast<Foam::volScalarField::Internal&>(V00()).field() = correctedV00;
+    }
+
+    // Correct the flux for injected faces - these are the faces which have
+    // no correspondence to the old mesh (i.e. added without a masterFace, edge
+    // or point). An example is the internal faces from hexRef8.
+    {
+        const labelList& faceMap = mpm.faceMap();
+
+        // JK TODO 
+        mapNewInternalFaces<scalar>(this->Sf(), this->magSf(), faceMap);
+        mapNewInternalFaces<vector>(this->Sf(), this->magSf(), faceMap);
+        
+//         mapNewInternalFaces<scalar>(faceMap);
+//         mapNewInternalFaces<vector>(faceMap);
+
+        // No oriented fields of more complex type
+        mapNewInternalFaces<sphericalTensor>(faceMap);
+        mapNewInternalFaces<symmTensor>(faceMap);
+        mapNewInternalFaces<tensor>(faceMap);
+    }
 }
 
 bool Foam::adaptiveFvMesh::firstUpdate()
