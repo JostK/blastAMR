@@ -542,9 +542,18 @@ Foam::fvMeshBalance::distribute()
     Foam::PtrList<Foam::pointScalarField> pointScalarFields(pointFieldsTable.size());
 
     Foam::label i = 0;
-    for (const auto& entry : pointFieldsTable)
+//     for (const auto& entry : pointFieldsTable)
+//     {
+//         pointScalarFields.set(i++, entry().second);  // entry.second is the pointer to the field
+//     }
+    forAllIter
+    (
+        typename Foam::HashTable<Foam::pointScalarField*, Foam::word>,
+        pointFieldsTable,
+        iter
+    )
     {
-        pointScalarFields.set(i++, entry().second);  // entry.second is the pointer to the field
+         pointScalarFields.set(i++, iter());
     }
     Info << "HALLO 0 nPointScalarFields " <<  pointScalarFields.size() << endl;
     
