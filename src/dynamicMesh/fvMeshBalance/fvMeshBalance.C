@@ -536,46 +536,56 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-//     PtrList<pointScalarField> pointScalarFields;
     const Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointScalarField>());
-
     Foam::PtrList<Foam::pointScalarField> pointScalarFields(pointFieldsTable.size());
-
     Foam::label i = 0;
     for (const auto* fieldPtr : pointFieldsTable)  
     {
         pointScalarFields.set(i++,  const_cast<Foam::pointScalarField*>(fieldPtr));  
     }
-//     for (const auto& entry : pointFieldsTable)
-//     {
-//         pointScalarFields.set(i++, entry().second);  // entry.second is the pointer to the field
-//     }
-//     forAllIter
-//     (
-//         typename Foam::HashTable<Foam::pointScalarField*>,
-//         pointFieldsTable,
-//         iter
-//     )
-//     {
-//          pointScalarFields.set(i++, iter());
-//     }
-    Info << "HALLO 0 nPointScalarFields " <<  pointScalarFields.size() << endl;
     
-    PtrList<pointVectorField> pointVectorFields;
-    PtrList<pointTensorField> pointTensorFields;
-    PtrList<pointSphericalTensorField> pointSphTensorFields;
-    PtrList<pointSymmTensorField> pointSymmTensorFields;
+    const Foam::HashTable<Foam::pointVectorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointVectorField>());
+    Foam::PtrList<Foam::pointVectorField> pointVectorFields(pointFieldsTable.size());
+    Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointVectorFields.set(i++,  const_cast<Foam::pointVectorField*>(fieldPtr));  
+    }
+    
+    const Foam::HashTable<Foam::pointTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointTensorField>());
+    Foam::PtrList<Foam::pointTensorField> pointTensorFields(pointFieldsTable.size());
+    Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointTensorFields.set(i++,  const_cast<Foam::pointTensorField*>(fieldPtr));  
+    }
+    
+    const Foam::HashTable<Foam::pointSphTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSphTensorField>());
+    Foam::PtrList<Foam::pointSphTensorField> pointSphTensorFields(pointFieldsTable.size());
+    Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointSphTensorFields.set(i++,  const_cast<Foam::pointSphTensorField*>(fieldPtr));  
+    }
+    
+    const Foam::HashTable<Foam::pointSymmTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSymmTensorField>());
+    Foam::PtrList<Foam::pointSymmTensorField> pointSymmTensorFields(pointFieldsTable.size());
+    Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointSymmTensorFields.set(i++,  const_cast<Foam::pointSymmTensorField*>(fieldPtr));  
+    }
     
     // Check processors have meshes
     // - check for 'faces' file (polyMesh)
     // - check for 'faceLabels' file (faMesh)
-    boolList volMeshOnProc;
-    volMeshOnProc.setSize(UPstream::nProcs(), true);
+//     boolList volMeshOnProc;
+//     volMeshOnProc.setSize(UPstream::nProcs(), true);
 //     boolList areaMeshOnProc;
 
     // Read handler on processors with a volMesh
 //     refPtr<fileOperation> volMeshReadHandler = fileOperation::New(fileHandler(), volMeshOnProc, true);
-    refPtr<fileOperation> noReadHandler;
+//     refPtr<fileOperation> noReadHandler;
     
 //     // All check if can read 'faces' file
 //     volMeshOnProc = haveMeshFile
@@ -590,7 +600,7 @@ Foam::fvMeshBalance::distribute()
 //     // only necessary on master but since polyMesh construction with
 //     // Pstream::parRun does parallel comms we have to do it on all
 //     // processors
-    autoPtr<fvMeshSubset> subsetterPtr;
+//     autoPtr<fvMeshSubset> subsetterPtr;
 // 
 //     // Missing a volume mesh somewhere?
 //     if (volMeshOnProc.found(false))
@@ -621,8 +631,8 @@ Info << "HALLO 2" << endl;
     
 Info << "HALLO 3" << endl;
     // pointFields
-    label nPointFields = 0;
-
+//     label nPointFields = 0;
+/*
         #define doFieldReading(Storage)                                       \
         {                                                                     \
             fieldsDistributor::readFields                                     \
@@ -633,7 +643,7 @@ Info << "HALLO 3" << endl;
             );                                                                \
             nPointFields += Storage.size();                                   \
         } 
-
+*/
 /*        #define doFieldReading(Storage)                                       \
         {                                                                     \
             fieldsDistributor::readFields                                     \
@@ -646,12 +656,12 @@ Info << "HALLO 3" << endl;
 */
 Info << "HALLO 4" << endl;
 //     doFieldReading(pointScalarFields);
-    doFieldReading(pointVectorFields);
-    doFieldReading(pointSphTensorFields);
-    doFieldReading(pointSymmTensorFields);
-    doFieldReading(pointTensorFields);
-    #undef doFieldReading
-Info << "HALLO 5 nPointFields " <<  nPointFields << endl;
+//     doFieldReading(pointVectorFields);
+//     doFieldReading(pointSphTensorFields);
+//     doFieldReading(pointSymmTensorFields);
+//     doFieldReading(pointTensorFields);
+//     #undef doFieldReading
+// Info << "HALLO 5 nPointFields " <<  nPointFields << endl;
     // TODO only needed if pointFields are present
     pointDistributor.saveMeshPoints();
 Info << "HALLO 6" << endl;
