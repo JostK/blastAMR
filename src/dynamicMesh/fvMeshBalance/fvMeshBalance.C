@@ -33,11 +33,6 @@ License
 #include "preservePatchesConstraint.H"
 #include "preserveBafflesConstraint.H"
 
-#include "faMeshesRegistry.H"
-#include "parFvFieldDistributor.H"
-#include "parPointFieldDistributor.H"
-#include "fieldsDistributor.H"
-
 using namespace Foam::decompositionConstraints;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -536,155 +531,6 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-    PtrList<pointScalarField> pointScalarFields;
-    PtrList<pointVectorField> pointVectorFields;
-    PtrList<pointTensorField> pointTensorFields;
-    PtrList<pointSphericalTensorField> pointSphTensorFields;
-    PtrList<pointSymmTensorField> pointSymmTensorFields;
-
-    {
-    const Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointScalarField>());
-    pointScalarFields.setSize(pointFieldsTable.size());
-    Foam::label i = 0;
-    for (const auto* fieldPtr : pointFieldsTable)  
-    {
-        pointScalarFields.set(i++,  const_cast<Foam::pointScalarField*>(fieldPtr));  
-    }
-    }
-    {
-    const Foam::HashTable<Foam::pointVectorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointVectorField>());
-    pointVectorFields.setSize(pointFieldsTable.size());
-    Foam::label i = 0;
-    for (const auto* fieldPtr : pointFieldsTable)  
-    {
-        pointVectorFields.set(i++,  const_cast<Foam::pointVectorField*>(fieldPtr));  
-    }
-    }
-    {
-    const Foam::HashTable<Foam::pointTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointTensorField>());
-    pointTensorFields.setSize(pointFieldsTable.size());
-    Foam::label i = 0;
-    for (const auto* fieldPtr : pointFieldsTable)  
-    {
-        pointTensorFields.set(i++,  const_cast<Foam::pointTensorField*>(fieldPtr));  
-    }
-    }
-    {
-    const Foam::HashTable<Foam::pointSphericalTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSphericalTensorField>());
-    pointSphTensorFields.setSize(pointFieldsTable.size());
-    Foam::label i = 0;
-    for (const auto* fieldPtr : pointFieldsTable)  
-    {
-        pointSphTensorFields.set(i++,  const_cast<Foam::pointSphericalTensorField*>(fieldPtr));  
-    }
-    }
-    {
-    const Foam::HashTable<Foam::pointSymmTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSymmTensorField>());
-    pointSymmTensorFields.setSize(pointFieldsTable.size());
-    Foam::label i = 0;
-    for (const auto* fieldPtr : pointFieldsTable)  
-    {
-        pointSymmTensorFields.set(i++,  const_cast<Foam::pointSymmTensorField*>(fieldPtr));  
-    }
-    }
-    
-    // Check processors have meshes
-    // - check for 'faces' file (polyMesh)
-    // - check for 'faceLabels' file (faMesh)
-//     boolList volMeshOnProc;
-//     volMeshOnProc.setSize(UPstream::nProcs(), true);
-//     boolList areaMeshOnProc;
-
-    // Read handler on processors with a volMesh
-//     refPtr<fileOperation> volMeshReadHandler = fileOperation::New(fileHandler(), volMeshOnProc, true);
-//     refPtr<fileOperation> noReadHandler;
-    
-//     // All check if can read 'faces' file
-//     volMeshOnProc = haveMeshFile
-//     (
-//         runTime,
-//         volMeshMasterInstance/volMeshSubDir,
-//         "faces"
-//     );
-//     
-//     // Create 0 sized mesh to do all the generation of zero sized
-//     // fields on processors that have zero sized meshes. Note that this is
-//     // only necessary on master but since polyMesh construction with
-//     // Pstream::parRun does parallel comms we have to do it on all
-//     // processors
-//     autoPtr<fvMeshSubset> subsetterPtr;
-// 
-//     // Missing a volume mesh somewhere?
-//     if (volMeshOnProc.found(false))
-//     {
-//         // A zero-sized mesh with boundaries.
-//         // This is used to create zero-sized fields.
-//         subsetterPtr.reset(new fvMeshSubset(mesh, zero{}));
-//         subsetterPtr().subMesh().init(true);
-//         subsetterPtr().subMesh().globalData();
-//         subsetterPtr().subMesh().tetBasePtIs();
-//         subsetterPtr().subMesh().geometricD();
-//     }
-//     
-Info << "HALLO 1" << endl;
-    
-    // Self-contained pointMesh for reading pointFields
-    const pointMesh oldPointMesh(mesh_);
-    refPtr<fileOperation> noWriteHandler; //TODO this is the problem
-    parPointFieldDistributor pointDistributor
-    (
-        oldPointMesh,   // source mesh
-        false,          // savePoints=false (ie, delay until later)
-//         false           // Do not write
-        noWriteHandler    // Do not write
-    );
-Info << "HALLO 2" << endl;
-    objectRegistry& objRegistry = mesh_.objectRegistry();
-    IOobjectList objects = objRegistry.IOobjects();
-    
-Info << "HALLO 3 objects"<< objects << endl;
-    // pointFields
-//     label nPointFields = 0;
-/*
-        #define doFieldReading(Storage)                                       \
-        {                                                                     \
-            fieldsDistributor::readFields                                     \
-            (                                                                 \
-                volMeshOnProc, noReadHandler, oldPointMesh,              \
-                subsetterPtr, objects, Storage,                               \
-                true                                \
-            );                                                                \
-            nPointFields += Storage.size();                                   \
-        } 
-*/
-/*        #define doFieldReading(Storage)                                       \
-        {                                                                     \
-            fieldsDistributor::readFields                                     \
-            (                                                                 \
-                oldPointMesh,              \
-                objects, Storage                               \
-            );                                                                \
-            nPointFields += Storage.size();                                   \
-        }
-*/
-Info << "HALLO 4" << endl;
-//     doFieldReading(pointScalarFields);
-//     doFieldReading(pointVectorFields);
-//     doFieldReading(pointSphTensorFields);
-//     doFieldReading(pointSymmTensorFields);
-//     doFieldReading(pointTensorFields);
-//     #undef doFieldReading
-// Info << "HALLO 5 nPointFields " <<  nPointFields << endl;
-    // TODO only needed if pointFields are present
-    pointDistributor.saveMeshPoints();
-Info << "HALLO 6" << endl;
-    
-    
-    
-    
-    
-    
-    
     //Correct values on all coupled patches
     correctBoundaries<volScalarField>();
     correctBoundaries<volVectorField>();
@@ -692,33 +538,20 @@ Info << "HALLO 6" << endl;
     correctBoundaries<volSymmTensorField>();
     correctBoundaries<volTensorField>();
 
-//     correctBoundaries<pointScalarField>();
-//     correctBoundaries<pointVectorField>();
-//     correctBoundaries<pointSphericalTensorField>();
-//     correctBoundaries<pointSymmTensorField>();
-//     correctBoundaries<pointTensorField>();
+    correctBoundaries<pointScalarField>();
+    correctBoundaries<pointVectorField>();
+    correctBoundaries<pointSphericalTensorField>();
+    correctBoundaries<pointSymmTensorField>();
+    correctBoundaries<pointTensorField>();
 
     blastMeshObject::preDistribute<fvMesh>(mesh_);
-    
-    // If faMeshesRegistry exists, it is also owned by the polyMesh and will
-    // be destroyed by clearGeom() in fvMeshDistribute::distribute()
-    //
-    // Rescue faMeshesRegistry from destruction by temporarily moving
-    // it to be locally owned.
-    std::unique_ptr<faMeshesRegistry> faMeshesRegistry_saved
-    (
-        faMeshesRegistry::Release(mesh_)
-    );
 
     Info<< "Distributing the mesh ..." << endl;
     balancing = true;
     autoPtr<mapDistributePolyMesh> map =
         distributor_.distribute(distribution_);
     balancing = false;
-    
-    // Restore ownership onto the polyMesh
-    faMeshesRegistry::Store(std::move(faMeshesRegistry_saved));
-    
+
     Info << "Successfully distributed mesh" << endl;
     label procLoadNew(mesh_.nCells());
     label overallLoadNew(returnReduce(procLoadNew, sumOp<label>()));
@@ -742,17 +575,7 @@ Info << "HALLO 6" << endl;
 
     blastMeshObject::distribute<fvMesh>(mesh_, map());
 
-    // TODO only needed if pointFields are present
-    
-    // Construct new pointMesh from distributed mesh
-    const pointMesh& newPointMesh = pointMesh::New(mesh_);
-    pointDistributor.resetTarget(newPointMesh, map());
-    pointDistributor.distributeAndStore(pointScalarFields);
-    pointDistributor.distributeAndStore(pointVectorFields);
-    pointDistributor.distributeAndStore(pointSphTensorFields);
-    pointDistributor.distributeAndStore(pointSymmTensorFields);
-    pointDistributor.distributeAndStore(pointTensorFields);
-    
+
     //Correct values on all coupled patches
     correctBoundaries<volScalarField>();
     correctBoundaries<volVectorField>();
@@ -760,11 +583,11 @@ Info << "HALLO 6" << endl;
     correctBoundaries<volSymmTensorField>();
     correctBoundaries<volTensorField>();
 
-//     correctBoundaries<pointScalarField>();
-//     correctBoundaries<pointVectorField>();
-//     correctBoundaries<pointSphericalTensorField>();
-//     correctBoundaries<pointSymmTensorField>();
-//     correctBoundaries<pointTensorField>();
+    correctBoundaries<pointScalarField>();
+    correctBoundaries<pointVectorField>();
+    correctBoundaries<pointSphericalTensorField>();
+    correctBoundaries<pointSymmTensorField>();
+    correctBoundaries<pointTensorField>();
 
     return map;
 }
