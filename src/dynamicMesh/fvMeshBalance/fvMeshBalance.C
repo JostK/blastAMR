@@ -545,13 +545,13 @@ Foam::fvMeshBalance::distribute()
     // Check processors have meshes
     // - check for 'faces' file (polyMesh)
     // - check for 'faceLabels' file (faMesh)
-//     boolList volMeshOnProc;
-//     volMeshOnProc.setSize(UPstream::nProcs(), true);1
+    boolList volMeshOnProc;
+    volMeshOnProc.setSize(UPstream::nProcs(), true);
 //     boolList areaMeshOnProc;
 
     // Read handler on processors with a volMesh
 //     refPtr<fileOperation> volMeshReadHandler = fileOperation::New(fileHandler(), volMeshOnProc, true);
-//     refPtr<fileOperation> noReadHandler;
+    refPtr<fileOperation> noReadHandler;
     
 //     // All check if can read 'faces' file
 //     volMeshOnProc = haveMeshFile
@@ -566,7 +566,7 @@ Foam::fvMeshBalance::distribute()
 //     // only necessary on master but since polyMesh construction with
 //     // Pstream::parRun does parallel comms we have to do it on all
 //     // processors
-//     autoPtr<fvMeshSubset> subsetterPtr;
+    autoPtr<fvMeshSubset> subsetterPtr;
 // 
 //     // Missing a volume mesh somewhere?
 //     if (volMeshOnProc.found(false))
@@ -598,7 +598,7 @@ Info << "HALLO 2" << endl;
 Info << "HALLO 3" << endl;
     // pointFields
     label nPointFields = 0;
-/*
+
         #define doFieldReading(Storage)                                       \
         {                                                                     \
             fieldsDistributor::readFields                                     \
@@ -609,8 +609,8 @@ Info << "HALLO 3" << endl;
             );                                                                \
             nPointFields += Storage.size();                                   \
         } 
-*/
-        #define doFieldReading(Storage)                                       \
+
+/*        #define doFieldReading(Storage)                                       \
         {                                                                     \
             fieldsDistributor::readFields                                     \
             (                                                                 \
@@ -619,6 +619,7 @@ Info << "HALLO 3" << endl;
             );                                                                \
             nPointFields += Storage.size();                                   \
         }
+*/
 Info << "HALLO 4" << endl;
     doFieldReading(pointScalarFields);
     doFieldReading(pointVectorFields);
@@ -626,7 +627,7 @@ Info << "HALLO 4" << endl;
     doFieldReading(pointSymmTensorFields);
     doFieldReading(pointTensorFields);
     #undef doFieldReading
-Pout << "HALLO 5 nPointFields " <<  nPointFields << endl;
+Info << "HALLO 5 nPointFields " <<  nPointFields << endl;
     // TODO only needed if pointFields are present
     pointDistributor.saveMeshPoints();
 Info << "HALLO 6" << endl;
