@@ -626,7 +626,7 @@ Info << "HALLO 4" << endl;
     doFieldReading(pointSymmTensorFields);
     doFieldReading(pointTensorFields);
     #undef doFieldReading
-Info << "HALLO 5 nPointFields " <<  nPointFields << endl;
+Pout << "HALLO 5 nPointFields " <<  nPointFields << endl;
     // TODO only needed if pointFields are present
     pointDistributor.saveMeshPoints();
 Info << "HALLO 6" << endl;
