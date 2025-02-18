@@ -645,7 +645,7 @@ Info << "HALLO 3" << endl;
         }
 */
 Info << "HALLO 4" << endl;
-    doFieldReading(pointScalarFields);
+//     doFieldReading(pointScalarFields);
     doFieldReading(pointVectorFields);
     doFieldReading(pointSphTensorFields);
     doFieldReading(pointSymmTensorFields);
