@@ -712,11 +712,11 @@ Info << "HALLO 6" << endl;
     correctBoundaries<volSymmTensorField>();
     correctBoundaries<volTensorField>();
 
-//     correctBoundaries<pointScalarField>();
-//     correctBoundaries<pointVectorField>();
-//     correctBoundaries<pointSphericalTensorField>();
-//     correctBoundaries<pointSymmTensorField>();
-//     correctBoundaries<pointTensorField>();
+    correctBoundaries<pointScalarField>();
+    correctBoundaries<pointVectorField>();
+    correctBoundaries<pointSphericalTensorField>();
+    correctBoundaries<pointSymmTensorField>();
+    correctBoundaries<pointTensorField>();
 
     return map;
 }
