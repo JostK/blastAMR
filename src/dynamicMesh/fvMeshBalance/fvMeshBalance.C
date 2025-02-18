@@ -34,6 +34,7 @@ License
 #include "preserveBafflesConstraint.H"
 
 #include "faMeshesRegistry.H"
+#include "parFvFieldDistributor.H"
 #include "parPointFieldDistributor.H"
 #include "fieldsDistributor.H"
 
