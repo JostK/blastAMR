@@ -536,11 +536,12 @@ bool Foam::fvMeshBalance::canBalance() const
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
-    Foam::PtrList<Foam::pointScalarField> pointScalarFields();
-    Foam::PtrList<Foam::pointVectorField> pointVectorFields();
-    Foam::PtrList<Foam::pointTensorField> pointTensorFields();
-    Foam::PtrList<Foam::pointSphTensorField> pointSphTensorFields();
-    Foam::PtrList<Foam::pointSymmTensorField> pointSymmTensorFields();
+    PtrList<pointScalarField> pointScalarFields;
+    PtrList<pointScalarField> pointScalarFields;
+    PtrList<pointVectorField> pointVectorFields;
+    PtrList<pointTensorField> pointTensorFields;
+    PtrList<pointSphTensorField> pointSphTensorFields;
+    PtrList<pointSymmTensorField> pointSymmTensorFields;
 
     {
     const Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointScalarField>());
@@ -569,24 +570,24 @@ Foam::fvMeshBalance::distribute()
         pointTensorFields.set(i++,  const_cast<Foam::pointTensorField*>(fieldPtr));  
     }
     }
-//     {
-//     const Foam::HashTable<Foam::pointSphTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSphTensorField>());
-//     pointSphTensorFields.setSize(pointFieldsTable.size());
-//     Foam::label i = 0;
-//     for (const auto* fieldPtr : pointFieldsTable)  
-//     {
-//         pointSphTensorFields.set(i++,  const_cast<Foam::pointSphTensorField*>(fieldPtr));  
-//     }
-//     }
-//     {
-//     const Foam::HashTable<Foam::pointSymmTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSymmTensorField>());
-//     pointSymmTensorFields.setSize(pointFieldsTable.size());
-//     Foam::label i = 0;
-//     for (const auto* fieldPtr : pointFieldsTable)  
-//     {
-//         pointSymmTensorFields.set(i++,  const_cast<Foam::pointSymmTensorField*>(fieldPtr));  
-//     }
-//     }
+    {
+    const Foam::HashTable<Foam::pointSphTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSphTensorField>());
+    pointSphTensorFields.setSize(pointFieldsTable.size());
+    Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointSphTensorFields.set(i++,  const_cast<Foam::pointSphTensorField*>(fieldPtr));  
+    }
+    }
+    {
+    const Foam::HashTable<Foam::pointSymmTensorField*>& pointFieldsTable(mesh_.lookupClass<Foam::pointSymmTensorField>());
+    pointSymmTensorFields.setSize(pointFieldsTable.size());
+    Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointSymmTensorFields.set(i++,  const_cast<Foam::pointSymmTensorField*>(fieldPtr));  
+    }
+    }
     
     // Check processors have meshes
     // - check for 'faces' file (polyMesh)
