@@ -544,13 +544,13 @@ Foam::fvMeshBalance::distribute()
     // Check processors have meshes
     // - check for 'faces' file (polyMesh)
     // - check for 'faceLabels' file (faMesh)
-    boolList volMeshOnProc;
-    volMeshOnProc.setSize(UPstream::nProcs(), true);
+//     boolList volMeshOnProc;
+//     volMeshOnProc.setSize(UPstream::nProcs(), true);1
 //     boolList areaMeshOnProc;
 
     // Read handler on processors with a volMesh
 //     refPtr<fileOperation> volMeshReadHandler = fileOperation::New(fileHandler(), volMeshOnProc, true);
-    refPtr<fileOperation> noReadHandler;
+//     refPtr<fileOperation> noReadHandler;
     
 //     // All check if can read 'faces' file
 //     volMeshOnProc = haveMeshFile
@@ -565,7 +565,7 @@ Foam::fvMeshBalance::distribute()
 //     // only necessary on master but since polyMesh construction with
 //     // Pstream::parRun does parallel comms we have to do it on all
 //     // processors
-    autoPtr<fvMeshSubset> subsetterPtr;
+//     autoPtr<fvMeshSubset> subsetterPtr;
 // 
 //     // Missing a volume mesh somewhere?
 //     if (volMeshOnProc.found(false))
@@ -579,7 +579,7 @@ Foam::fvMeshBalance::distribute()
 //         subsetterPtr().subMesh().geometricD();
 //     }
 //     
-  
+Info << "HALLO 1" << endl;
     
     // Self-contained pointMesh for reading pointFields
     const pointMesh oldPointMesh(mesh_);
@@ -591,34 +591,44 @@ Foam::fvMeshBalance::distribute()
         false           // Do not write
 //         noWriteHandler    // Do not write
     );
-    
+Info << "HALLO 2" << endl;
     IOobjectList objects = IOobjectList(mesh_, mesh_.time().timeName());
     
-    
+Info << "HALLO 3" << endl;
     // pointFields
     label nPointFields = 0;
-
+/*
         #define doFieldReading(Storage)                                       \
         {                                                                     \
             fieldsDistributor::readFields                                     \
             (                                                                 \
                 volMeshOnProc, noReadHandler, oldPointMesh,              \
                 subsetterPtr, objects, Storage,                               \
-                true  /* (deregister field) */                                \
+                true                                \
+            );                                                                \
+            nPointFields += Storage.size();                                   \
+        } 
+*/
+        #define doFieldReading(Storage)                                       \
+        {                                                                     \
+            fieldsDistributor::readFields                                     \
+            (                                                                 \
+                oldPointMesh,              \
+                objects, Storage                               \
             );                                                                \
             nPointFields += Storage.size();                                   \
         }
-
+Info << "HALLO 4" << endl;
     doFieldReading(pointScalarFields);
     doFieldReading(pointVectorFields);
     doFieldReading(pointSphTensorFields);
     doFieldReading(pointSymmTensorFields);
     doFieldReading(pointTensorFields);
     #undef doFieldReading
-    
+Info << "HALLO 5" << endl;
     // TODO only needed if pointFields are present
     pointDistributor.saveMeshPoints();
-
+Info << "HALLO 6" << endl;
     
     
     
