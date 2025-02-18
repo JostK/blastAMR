@@ -39,6 +39,7 @@ Description
 
 #include "fvMeshDistribute.H"
 #include "mapDistributePolyMesh.H"
+#include "parPointFieldDistributor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
