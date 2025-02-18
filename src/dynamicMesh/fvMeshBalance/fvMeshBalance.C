@@ -548,7 +548,7 @@ Foam::fvMeshBalance::distribute()
 //     }
     forAllIter
     (
-        typename Foam::HashTable<Foam::pointScalarField*, Foam::word>,
+        typename Foam::HashTable<Foam::pointScalarField*,Foam::word>,
         pointFieldsTable,
         iter
     )
