@@ -639,7 +639,8 @@ Info << "HALLO 1" << endl;
         noWriteHandler    // Do not write
     );
 Info << "HALLO 2" << endl;
-    IOobjectList objects = mesh_.objectRegistry().IOobjects();
+    objectRegistry& objRegistry = mesh_.objectRegistry();
+    IOobjectList objects = objRegistry.IOobjects();
     
 Info << "HALLO 3 objects"<< objects << endl;
     // pointFields
