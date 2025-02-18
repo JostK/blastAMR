@@ -537,24 +537,28 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::fvMeshBalance::distribute()
 {
 //     PtrList<pointScalarField> pointScalarFields;
-    Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable = mesh_.lookupClass<Foam::pointScalarField>();
+    const Foam::HashTable<Foam::pointScalarField*>& pointFieldsTable = mesh_.lookupClass<Foam::pointScalarField>();
 
     Foam::PtrList<Foam::pointScalarField> pointScalarFields(pointFieldsTable.size());
 
     Foam::label i = 0;
+    for (const auto* fieldPtr : pointFieldsTable)  
+    {
+        pointScalarFields.set(i++, fieldPtr);  
+    }
 //     for (const auto& entry : pointFieldsTable)
 //     {
 //         pointScalarFields.set(i++, entry().second);  // entry.second is the pointer to the field
 //     }
-    forAllIter
-    (
-        typename Foam::HashTable<Foam::pointScalarField*>,
-        pointFieldsTable,
-        iter
-    )
-    {
-         pointScalarFields.set(i++, iter());
-    }
+//     forAllIter
+//     (
+//         typename Foam::HashTable<Foam::pointScalarField*>,
+//         pointFieldsTable,
+//         iter
+//     )
+//     {
+//          pointScalarFields.set(i++, iter());
+//     }
     Info << "HALLO 0 nPointScalarFields " <<  pointScalarFields.size() << endl;
     
     PtrList<pointVectorField> pointVectorFields;
