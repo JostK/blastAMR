@@ -641,7 +641,7 @@ Info << "HALLO 1" << endl;
 Info << "HALLO 2" << endl;
     IOobjectList objects = IOobjectList(mesh_, mesh_.time().timeName());
     
-Info << "HALLO 3" << endl;
+Info << "HALLO 3 objects"<< objects << endl;
     // pointFields
 //     label nPointFields = 0;
 /*
