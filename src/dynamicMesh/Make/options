@@ -8,4 +8,4 @@ LIB_LIBS = \
     -lfiniteVolume \
     -ldynamicMesh \
     -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp -lscotchDecomp
+    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp -lscotchDecomp -lkahipDecomp
