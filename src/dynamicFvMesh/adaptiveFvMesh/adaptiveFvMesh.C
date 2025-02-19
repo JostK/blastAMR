@@ -351,6 +351,7 @@ void Foam::adaptiveFvMesh::mapFields(const mapPolyMesh& mpm)
     // point that the points have not moved and the cells have only been split
     // or merged. We hope that dynamicMotionSolverListFvMesh::mapFields
     // does not use old-time volumes ...
+    if(V0Ptr_)
     {
         const labelList& cellMap = mpm.cellMap();
         const labelList& reverseCellMap = mpm.reverseCellMap();
@@ -404,6 +405,7 @@ void Foam::adaptiveFvMesh::mapFields(const mapPolyMesh& mpm)
     // point that the points have not moved and the cells have only been split
     // or merged. We hope that dynamicMotionSolverListFvMesh::mapFields
     // does not use old-time volumes ...
+    if(V00Ptr_)
     {
         const labelList& cellMap = mpm.cellMap();
         const labelList& reverseCellMap = mpm.reverseCellMap();
