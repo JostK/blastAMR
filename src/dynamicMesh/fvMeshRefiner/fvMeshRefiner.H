@@ -414,13 +414,11 @@ public:
 
     // Writing
 
-        //- Write using given format, version and compression
+        //- Write using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
-            const bool write = true
+            IOstreamOption streamOpt,
+            const bool writeOnProc
         ) const;
 
 

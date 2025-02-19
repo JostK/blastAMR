@@ -982,15 +982,13 @@ void Foam::fvMeshRefiner::extendMarkedCellsAcrossPoints
 
 bool Foam::fvMeshRefiner::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
-    const bool write
+    IOstreamOption streamOpt,
+    const bool writeOnProc
 ) const
 {
-    bool writeOK = balancer_.write(write);
+    bool writeOK = balancer_.write(writeOnProc);
 
-    if (dumpLevel_ && write)
+    if (dumpLevel_ && writeOnProc)
     {
         volScalarField scalarCellLevel
         (

@@ -1739,17 +1739,15 @@ bool Foam::fvMeshHexRefiner::refine
 
 bool Foam::fvMeshHexRefiner::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
-    const bool write
+    IOstreamOption streamOpt,
+    const bool writeOnProc
 ) const
 {
     // Force refinement data to go to the current time directory.
     const_cast<hexRef&>(meshCutter_()).setInstance(mesh_.facesInstance());
 
     bool writeOk =
-        fvMeshRefiner::writeObject(fmt, ver, cmp, write)
+        fvMeshRefiner::writeObject(streamOpt, writeOnProc)
      && meshCutter_->write();
 
     if (returnReduce(nProtected_, sumOp<label>()) > 0)

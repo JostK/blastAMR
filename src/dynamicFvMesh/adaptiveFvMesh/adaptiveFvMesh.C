@@ -519,9 +519,7 @@ bool Foam::adaptiveFvMesh::writeObject
     const bool valid
 ) const
 {
-    return
-        dynamicFvMesh::writeObject(streamOpt, valid);
-     //&& refiner_->write();
+    return dynamicFvMesh::writeObject(streamOpt, valid) && refiner_->writeObject(streamOpt, valid);
 }
 
 

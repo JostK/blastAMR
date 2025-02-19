@@ -507,13 +507,11 @@ void Foam::fvMeshPolyRefiner::distribute(const mapDistributePolyMesh& map)
 
 bool Foam::fvMeshPolyRefiner::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
-    const bool write
+    IOstreamOption streamOpt,
+    const bool writeOnProc
 ) const
 {
-    if (debug && mesh_.time().timeIndex() != 0 && write)
+    if (debug && mesh_.time().timeIndex() != 0 && writeOnProc)
     {
         volScalarField clusters
         (
@@ -534,7 +532,7 @@ bool Foam::fvMeshPolyRefiner::writeObject
         clusters.write();
     }
     return
-        fvMeshRefiner::writeObject(fmt, ver, cmp, write)
+        fvMeshRefiner::writeObject(streamOpt, writeOnProc)
      && refiner_->write();
 }
 
