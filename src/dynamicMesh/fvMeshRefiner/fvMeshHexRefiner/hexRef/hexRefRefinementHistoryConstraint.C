@@ -34,12 +34,12 @@ namespace Foam
 {
     defineTypeName(hexRefRefinementHistoryConstraint);
 
-    //addToRunTimeSelectionTable
-    //(
-    //    decompositionConstraint,
-    //    hexRefRefinementHistoryConstraint,
-    //    dictionary
-    //);
+    addToRunTimeSelectionTable
+    (
+       decompositionConstraint,
+       hexRefRefinementHistoryConstraint,
+       dictionary
+    );
 }
 
 
@@ -47,8 +47,7 @@ namespace Foam
 
 Foam::hexRefRefinementHistoryConstraint::hexRefRefinementHistoryConstraint
 (
-    const dictionary& constraintsDict,
-    const word& modelType
+    const dictionary& constraintsDict
 )
 :
     decompositionConstraint(constraintsDict, typeName)
