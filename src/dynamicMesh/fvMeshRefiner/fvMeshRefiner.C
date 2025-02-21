@@ -52,6 +52,8 @@ License
 //#include "parcelCloud.H"
 #include "extrapolatedCalculatedFvPatchField.H"
 
+#include "turbulenceModel.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -662,6 +664,16 @@ bool Foam::fvMeshRefiner::balance()
 
         //- Distribute other data
         distribute(map());
+        
+        
+        Info << "Updating y_" << endl;
+        const Foam::HashTable<turbulenceModel*>& turbulenceModels(mesh_.lookupClass<turbulenceModel>());
+        for (const auto* turbMod : turbulenceModels)  
+        {
+            turbulenceModel& turbModel = mesh_.lookupObjectRef<turbulenceModel>(turbMod->name());
+            Info << "Updating y_ on " << turbMod->name() << endl;
+            static_cast<Foam::turbulenceModel&>(turbModel).correct();
+        }
 
         isBalancing_ = false;
 
