@@ -665,14 +665,13 @@ bool Foam::fvMeshRefiner::balance()
         //- Distribute other data
         distribute(map());
         
-        
-        Info << "Updating y_" << endl;
         const Foam::HashTable<turbulenceModel*>& turbulenceModels(mesh_.lookupClass<turbulenceModel>());
         for (const auto* turbMod : turbulenceModels)  
         {
             turbulenceModel& turbModel = mesh_.lookupObjectRef<turbulenceModel>(turbMod->name());
-            Info << "Updating y_ on " << turbMod->name() << endl;
-            static_cast<Foam::turbulenceModel&>(turbModel).correct();
+            DebugInfo << "Updating y_ on " << turbMod->name() << endl;
+            // Only call correct() for the case class to update y_
+            turbModel.Foam::turbulenceModel::correct();
         }
 
         isBalancing_ = false;
