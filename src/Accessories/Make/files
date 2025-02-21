@@ -1,0 +1,4 @@
+turbulenceModels/makeTurbModel.C
+fvOptions/blastMeanVelocityForce/blastMeanVelocityForce.C
+
+LIB = $(FOAM_USER_LIBBIN)/libamrAccessories

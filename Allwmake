@@ -32,6 +32,7 @@ fi
 wmake src/errorEstimators
 wmake src/dynamicMesh
 wmake src/dynamicFvMesh
+wmake src/Accessories
 
 wmake applications/utilities/updateMesh
 wmake applications/solvers/combustion/reactingDyMFoam
