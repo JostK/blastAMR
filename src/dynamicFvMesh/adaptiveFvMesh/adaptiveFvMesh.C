@@ -119,177 +119,6 @@ void Foam::adaptiveFvMesh::readDict()
 
 void Foam::adaptiveFvMesh::updateMesh(const mapPolyMesh& map)
 {
-    // Update fluxes
-    {
-        const labelList& faceMap = map.faceMap();
-        const labelList& reverseFaceMap = map.reverseFaceMap();
-
-        // Storage for any master faces. These will be the original faces
-        // on the coarse cell that get split into four (or rather the
-        // master face gets modified and three faces get added from the master)
-        // Estimate number of faces created
-
-        bitSet masterFaces(nFaces());
-
-        forAll(faceMap, facei)
-        {
-            const label oldFacei = faceMap[facei];
-
-            if (oldFacei >= 0)
-            {
-                const label masterFacei = reverseFaceMap[oldFacei];
-
-                if (masterFacei < 0)
-                {
-                    FatalErrorInFunction
-                        << "Problem: should not have removed faces"
-                        << " when refining."
-                        << nl << "face:" << facei << endl
-                        << abort(FatalError);
-                }
-                else if (masterFacei != facei)
-                {
-                    masterFaces.set(masterFacei);
-                }
-            }
-        }
-
-        if (debug)
-        {
-            Pout<< "Found " << masterFaces.count() << " split faces " << endl;
-        }
-
-        HashTable<surfaceScalarField*> fluxes
-        (
-            lookupClass<surfaceScalarField>()
-        );
-
-        // Remove surfaceInterpolation to allow re-calculation on demand
-        // This could be done in fvMesh::updateMesh but some dynamicFvMesh
-        // might need the old interpolation fields (weights, etc).
-        surfaceInterpolation::clearOut();
-
-        forAllIters(fluxes, iter)
-        {
-            if (!correctFluxes_.found(iter.key()))
-            {
-                WarningInFunction
-                    << "Cannot find surfaceScalarField " << iter.key()
-                    << " in user-provided flux mapping table "
-                    << correctFluxes_ << endl
-                    << "    The flux mapping table is used to recreate the"
-                    << " flux on newly created faces." << endl
-                    << "    Either add the entry if it is a flux or use ("
-                    << iter.key() << " none) to suppress this warning."
-                    << endl;
-                continue;
-            }
-
-            const word& UName = correctFluxes_[iter.key()];
-
-            if (UName == "none")
-            {
-                continue;
-            }
-
-            surfaceScalarField& phi = *iter();
-
-            if (UName == "NaN")
-            {
-                Pout<< "Setting surfaceScalarField " << iter.key()
-                    << " to NaN" << endl;
-
-                sigFpe::fillNan(phi.primitiveFieldRef());
-
-                continue;
-            }
-
-            if (debug)
-            {
-                Pout<< "Mapping flux " << iter.key()
-                    << " using interpolated flux " << UName
-                    << endl;
-            }
-
-            const surfaceScalarField phiU
-            (
-                fvc::interpolate
-                (
-                    lookupObject<volVectorField>(UName)
-                )
-              & Sf()
-            );
-
-            // Recalculate new internal faces.
-            for (label facei = 0; facei < nInternalFaces(); ++facei)
-            {
-                const label oldFacei = faceMap[facei];
-
-                if (oldFacei == -1)
-                {
-                    // Inflated/appended
-                    phi[facei] = phiU[facei];
-                }
-                else if (reverseFaceMap[oldFacei] != facei)
-                {
-                    // face-from-masterface
-                    phi[facei] = phiU[facei];
-                }
-            }
-
-            // Recalculate new boundary faces.
-            surfaceScalarField::Boundary& phiBf = phi.boundaryFieldRef();
-
-            forAll(phiBf, patchi)
-            {
-                fvsPatchScalarField& patchPhi = phiBf[patchi];
-                const fvsPatchScalarField& patchPhiU =
-                    phiU.boundaryField()[patchi];
-
-                label facei = patchPhi.patch().start();
-
-                forAll(patchPhi, i)
-                {
-                    const label oldFacei = faceMap[facei];
-
-                    if (oldFacei == -1)
-                    {
-                        // Inflated/appended
-                        patchPhi[i] = patchPhiU[i];
-                    }
-                    else if (reverseFaceMap[oldFacei] != facei)
-                    {
-                        // face-from-masterface
-                        patchPhi[i] = patchPhiU[i];
-                    }
-
-                    ++facei;
-                }
-            }
-
-            // Update master faces
-            for (const label facei : masterFaces)
-            {
-                if (isInternalFace(facei))
-                {
-                    phi[facei] = phiU[facei];
-                }
-                else
-                {
-                    const label patchi = boundaryMesh().whichPatch(facei);
-                    const label i = facei - boundaryMesh()[patchi].start();
-
-                    const fvsPatchScalarField& patchPhiU =
-                        phiU.boundaryField()[patchi];
-
-                    fvsPatchScalarField& patchPhi = phiBf[patchi];
-
-                    patchPhi[i] = patchPhiU[i];
-                }
-            }
-        }
-    }
-
     fvMesh::updateMesh(map);
 
     // Bugfix: update refiner object manually.
@@ -454,6 +283,172 @@ void Foam::adaptiveFvMesh::mapFields(const mapPolyMesh& mpm)
         
         // TODO setV00() does not exist, so you left me no choice
         const_cast<Foam::volScalarField::Internal&>(V00()).field() = correctedV00;
+    }
+    
+    // Update fluxes
+    {
+        const labelList& faceMap = mpm.faceMap();
+        const labelList& reverseFaceMap = mpm.reverseFaceMap();
+
+        // Storage for any master faces. These will be the original faces
+        // on the coarse cell that get split into four (or rather the
+        // master face gets modified and three faces get added from the master)
+        // Estimate number of faces created
+
+        bitSet masterFaces(nFaces());
+
+        forAll(faceMap, facei)
+        {
+            const label oldFacei = faceMap[facei];
+
+            if (oldFacei >= 0)
+            {
+                const label masterFacei = reverseFaceMap[oldFacei];
+
+                if (masterFacei < 0)
+                {
+                    FatalErrorInFunction
+                        << "Problem: should not have removed faces"
+                        << " when refining."
+                        << nl << "face:" << facei << endl
+                        << abort(FatalError);
+                }
+                else if (masterFacei != facei)
+                {
+                    masterFaces.set(masterFacei);
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Found " << masterFaces.count() << " split faces " << endl;
+        }
+
+        UPtrList<surfaceScalarField> fluxes
+        (
+            this->objectRegistry::sorted<surfaceScalarField>()
+        );
+
+        // Remove surfaceInterpolation to allow re-calculation on demand
+        // This could be done in fvMesh::updateMesh but some dynamicFvMesh
+        // might need the old interpolation fields (weights, etc).
+        surfaceInterpolation::clearOut();
+
+        for (surfaceScalarField& phi : fluxes)
+        {
+            const word& UName = correctFluxes_.lookup(phi.name(), word::null);
+
+            if (UName.empty())
+            {
+                WarningInFunction
+                    << "Cannot find surfaceScalarField " << phi.name()
+                    << " in user-provided flux mapping table "
+                    << correctFluxes_ << endl
+                    << "    The flux mapping table is used to recreate the"
+                    << " flux on newly created faces." << endl
+                    << "    Either add the entry if it is a flux or use ("
+                    << phi.name() << " none) to suppress this warning."
+                    << endl;
+                continue;
+            }
+            if (UName == "none")
+            {
+                continue;
+            }
+            if (UName == "NaN")
+            {
+                Pout<< "Setting surfaceScalarField " << phi.name()
+                    << " to NaN" << endl;
+
+                sigFpe::fillNan(phi.primitiveFieldRef());
+                continue;
+            }
+
+            if (debug)
+            {
+                Pout<< "Mapping flux " << phi.name()
+                    << " using interpolated flux " << UName
+                    << endl;
+            }
+
+            const surfaceScalarField phiU
+            (
+                fvc::interpolate
+                (
+                    lookupObject<volVectorField>(UName)
+                )
+              & Sf()
+            );
+
+            // Recalculate new internal faces.
+            for (label facei = 0; facei < nInternalFaces(); ++facei)
+            {
+                const label oldFacei = faceMap[facei];
+
+                if (oldFacei == -1)
+                {
+                    // Inflated/appended
+                    phi[facei] = phiU[facei];
+                }
+                else if (reverseFaceMap[oldFacei] != facei)
+                {
+                    // face-from-masterface
+                    phi[facei] = phiU[facei];
+                }
+            }
+
+            // Recalculate new boundary faces.
+            auto& phiBf = phi.boundaryFieldRef();
+
+            forAll(phiBf, patchi)
+            {
+                fvsPatchScalarField& patchPhi = phiBf[patchi];
+                const fvsPatchScalarField& patchPhiU =
+                    phiU.boundaryField()[patchi];
+
+                label facei = patchPhi.patch().start();
+
+                forAll(patchPhi, i)
+                {
+                    const label oldFacei = faceMap[facei];
+
+                    if (oldFacei == -1)
+                    {
+                        // Inflated/appended
+                        patchPhi[i] = patchPhiU[i];
+                    }
+                    else if (reverseFaceMap[oldFacei] != facei)
+                    {
+                        // face-from-masterface
+                        patchPhi[i] = patchPhiU[i];
+                    }
+
+                    ++facei;
+                }
+            }
+
+            // Update master faces
+            for (const label facei : masterFaces)
+            {
+                if (isInternalFace(facei))
+                {
+                    phi[facei] = phiU[facei];
+                }
+                else
+                {
+                    const label patchi = boundaryMesh().whichPatch(facei);
+                    const label i = facei - boundaryMesh()[patchi].start();
+
+                    const fvsPatchScalarField& patchPhiU =
+                        phiU.boundaryField()[patchi];
+
+                    fvsPatchScalarField& patchPhi = phiBf[patchi];
+
+                    patchPhi[i] = patchPhiU[i];
+                }
+            }
+        }
     }
 
     // Correct the flux for injected faces - these are the faces which have
