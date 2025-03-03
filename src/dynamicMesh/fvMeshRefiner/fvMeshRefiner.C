@@ -999,17 +999,21 @@ bool Foam::fvMeshRefiner::writeObject
 {
     bool writeOK = balancer_.write(writeOnProc);
 
-    if (dumpLevel_ && writeOnProc)
+    if (dumpLevel_)
     {
         volScalarField scalarCellLevel
         (
-            volScalarField::New
+            IOobject
             (
                 "cellLevel",
+                mesh_.time().timeName(),
                 mesh_,
-                dimensionedScalar(dimless, 0),
-                extrapolatedCalculatedFvPatchField<scalar>::typeName
-            )
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar(dimless, Zero)
         );
         forAll(cellLevel(), celli)
         {
@@ -1019,12 +1023,17 @@ bool Foam::fvMeshRefiner::writeObject
 
         pointScalarField scalarPointLevel
         (
-            pointScalarField::New
+            IOobject
             (
                 "pointLevel",
-                pointMesh::New(mesh_),
-                dimensionedScalar(dimless, 0.0)
-            )
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            pointMesh::New(mesh_),
+            dimensionedScalar(dimless, Zero)
         );
 
         scalarField& sPointLevel = scalarPointLevel.primitiveFieldRef();
@@ -1033,10 +1042,7 @@ bool Foam::fvMeshRefiner::writeObject
             sPointLevel[pointi] = pointLevel()[pointi];
         }
 
-        return
-            writeOK
-         && scalarCellLevel.write()
-         && scalarPointLevel.write();
+        writeOK = writeOK && scalarCellLevel.write() && scalarPointLevel.write();
     }
     return writeOK;
 }

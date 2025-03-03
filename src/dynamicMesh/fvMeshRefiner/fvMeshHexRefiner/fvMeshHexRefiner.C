@@ -1060,6 +1060,7 @@ Foam::fvMeshHexRefiner::fvMeshHexRefiner(fvMesh& mesh)
 
         Info<< "Detected " << returnReduce(nProtected_, sumOp<label>())
             << " cells that are protected from refinement." << endl;
+        protectedCells.write();
     }
 }
 
@@ -1514,6 +1515,7 @@ Foam::fvMeshHexRefiner::fvMeshHexRefiner
 
         Info<< "Detected " << returnReduce(nProtected_, sumOp<label>())
             << " cells that are protected from refinement." << endl;
+        protectedCells.write();
     }
 }
 
@@ -1744,31 +1746,32 @@ bool Foam::fvMeshHexRefiner::writeObject
 ) const
 {
     // Force refinement data to go to the current time directory.
-    const_cast<hexRef&>(meshCutter_()).setInstance(mesh_.facesInstance());
+    const_cast<hexRef&>(meshCutter_()).setInstance(mesh_.time().timeName());
 
     bool writeOk =
         fvMeshRefiner::writeObject(streamOpt, writeOnProc)
      && meshCutter_->write();
 
-    if (returnReduce(nProtected_, sumOp<label>()) > 0)
-    {
-        cellSet protectedCells(mesh_, "protectedCells", nProtected_);
-        forAll(protectedCell_, celli)
-        {
-            if (protectedCell_.get(celli))
-            {
-                protectedCells.insert(celli);
-            }
-        }
-
-        Info<< "Detected " << returnReduce(nProtected_, sumOp<label>())
-            << " cells that are protected from refinement."
-            << " Writing these to cellSet "
-            << protectedCells.name()
-            << "." << endl;
-
-        protectedCells.write();
-    }
+// Do not write protectedCells (only at the start)
+//     if (returnReduce(nProtected_, sumOp<label>()) > 0)
+//     {
+//         cellSet protectedCells(mesh_, "protectedCells", nProtected_);
+//         forAll(protectedCell_, celli)
+//         {
+//             if (protectedCell_.get(celli))
+//             {
+//                 protectedCells.insert(celli);
+//             }
+//         }
+// 
+//         Info<< "Detected " << returnReduce(nProtected_, sumOp<label>())
+//             << " cells that are protected from refinement."
+//             << " Writing these to cellSet "
+//             << protectedCells.name()
+//             << "." << endl;
+// 
+//         protectedCells.write();
+//     }
 
     return writeOk;
 }
