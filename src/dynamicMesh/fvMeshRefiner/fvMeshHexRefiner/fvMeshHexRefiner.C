@@ -246,9 +246,8 @@ Foam::fvMeshHexRefiner::refine
     movePoints(newPoints);
     */
     
-    // JK TODO ?
     // Update numbering of cells/vertices.
-//     meshCutter_.updateMesh(*map);
+    meshCutter_->updateMesh(*map);
     
     // Update numbering of protectedCell_
     if (protectedCell_.size())
@@ -329,9 +328,8 @@ Foam::fvMeshHexRefiner::unrefine
     // Correct the flux for modified faces.
     
 
-    // JK TODO ?
     // Update numbering of cells/vertices.
-//     meshCutter_.updateMesh(*map);
+    meshCutter_->updateMesh(*map);
     
     // Update numbering of protectedCell_
     if (protectedCell_.size())
