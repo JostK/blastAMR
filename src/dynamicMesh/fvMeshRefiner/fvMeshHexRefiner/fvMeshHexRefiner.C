@@ -229,7 +229,8 @@ Foam::fvMeshHexRefiner::refine
     //    // Remove the cell tree
     //    cellTreePtr_.clear();
 
-    // Update fields
+    // Update fields 
+    // JK NOTE this also upates the meshCutter_
     mesh_.updateMesh(*map);
 
     // Move mesh
@@ -245,9 +246,6 @@ Foam::fvMeshHexRefiner::refine
     }
     movePoints(newPoints);
     */
-    
-    // Update numbering of cells/vertices.
-    meshCutter_->updateMesh(*map);
     
     // Update numbering of protectedCell_
     if (protectedCell_.size())
@@ -306,7 +304,8 @@ Foam::fvMeshHexRefiner::unrefine
         << " to " << mesh_.globalData().nTotalCells() << " cells."
         << endl;
 
-    // Update fields
+    // Update fields 
+    // JK NOTE this also upates the meshCutter_
     mesh_.updateMesh(*map);
     
     // Move mesh
@@ -324,12 +323,9 @@ Foam::fvMeshHexRefiner::unrefine
     */
     
     
-    // JK TODO 
+    // JK TODO is mapFields called after this? then we should not need flux mapping here, right?
     // Correct the flux for modified faces.
     
-
-    // Update numbering of cells/vertices.
-    meshCutter_->updateMesh(*map);
     
     // Update numbering of protectedCell_
     if (protectedCell_.size())
