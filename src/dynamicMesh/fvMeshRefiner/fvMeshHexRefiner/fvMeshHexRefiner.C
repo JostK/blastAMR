@@ -198,10 +198,11 @@ Foam::fvMeshHexRefiner::refine
     // Clear moving flag. This is currently required since geometry calculation
     // might get triggered when doing processor patches.
     // (TBD: should be in changeMesh if no inflation?)
-    mesh_.moving(false);
+    bool wasMoving = mesh_.moving(false);
     // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false);
-
+    mesh_.moving(wasMoving);
+    
     Info<< "Refined from "
         << returnReduce(map().nOldCells(), sumOp<label>())
         << " to " << mesh_.globalData().nTotalCells() << " cells." << endl;
@@ -295,10 +296,11 @@ Foam::fvMeshHexRefiner::unrefine
     // Clear moving flag. This is currently required since geometry calculation
     // might get triggered when doing processor patches.
     // (TBD: should be in changeMesh if no inflation?)
-    mesh_.moving(false);
+    bool wasMoving = mesh_.moving(false);
     // Create mesh (no inflation), return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false);
-
+    mesh_.moving(wasMoving);
+    
     Info<< "Unrefined from "
         << returnReduce(map().nOldCells(), sumOp<label>())
         << " to " << mesh_.globalData().nTotalCells() << " cells."
@@ -1533,6 +1535,7 @@ bool Foam::fvMeshHexRefiner::refine
 {
     readDict(this->dict_);
     bool hasChanged = false;
+    bool wasMoving = mesh_.moving();
 
     if (preUpdate())
     {
@@ -1722,7 +1725,7 @@ bool Foam::fvMeshHexRefiner::refine
             // Reset moving flag (if any). If not using inflation we'll not
             // move, if are using inflation any follow on movePoints will set
             // it.
-            mesh_.moving(false);
+            mesh_.moving(wasMoving);
 
             // Make sure all processors have the correct instance
             mesh_.setInstance(mesh_.time().timeName());
