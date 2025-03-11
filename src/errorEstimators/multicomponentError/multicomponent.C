@@ -102,27 +102,27 @@ void Foam::errorEstimators::multicomponent::update(const bool scale)
         return;
     }
 
-    volScalarField error
-    (
-        IOobject
-        (
-            "error",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        -1.0
-    );
+    volScalarField& error(error_);
+//     volScalarField error
+//     (
+//         IOobject
+//         (
+//             "error",
+//             mesh_.time().timeName(),
+//             mesh_,
+//             IOobject::NO_READ,
+//             IOobject::NO_WRITE,
+//             false
+//         ),
+//         mesh_,
+//         -1.0
+//     );
 
     forAll(errors_, i)
     {
         errors_[i].update(scale);
         error = max(error,  errors_[i].error());
     }
-    error_ = error;
 }
 
 
