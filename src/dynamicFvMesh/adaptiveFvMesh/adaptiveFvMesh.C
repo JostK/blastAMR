@@ -175,6 +175,26 @@ Foam::adaptiveFvMesh::~adaptiveFvMesh()
 void Foam::adaptiveFvMesh::mapFields(const mapPolyMesh& mpm)
 {
     dynamicFvMesh::mapFields(mpm);
+    
+
+    // Correct the flux for injected faces - these are the faces which have
+    // no correspondence to the old mesh (i.e. added without a masterFace, edge
+    // or point). An example is the internal faces from hexRef8.
+    {
+        const labelList& faceMap = mpm.faceMap();
+
+        // JK TODO 
+        mapNewInternalFaces<scalar>(this->Sf(), this->magSf(), faceMap);
+        mapNewInternalFaces<vector>(this->Sf(), this->magSf(), faceMap);
+        
+//         mapNewInternalFaces<scalar>(faceMap);
+//         mapNewInternalFaces<vector>(faceMap);
+
+        // No oriented fields of more complex type
+        mapNewInternalFaces<sphericalTensor>(faceMap);
+        mapNewInternalFaces<symmTensor>(faceMap);
+        mapNewInternalFaces<tensor>(faceMap);
+    }
 
     // Correct old-time volumes for refined/unrefined cells. We know at this
     // point that the points have not moved and the cells have only been split
@@ -449,25 +469,6 @@ void Foam::adaptiveFvMesh::mapFields(const mapPolyMesh& mpm)
                 }
             }
         }
-    }
-
-    // Correct the flux for injected faces - these are the faces which have
-    // no correspondence to the old mesh (i.e. added without a masterFace, edge
-    // or point). An example is the internal faces from hexRef8.
-    {
-        const labelList& faceMap = mpm.faceMap();
-
-        // JK TODO 
-        mapNewInternalFaces<scalar>(this->Sf(), this->magSf(), faceMap);
-        mapNewInternalFaces<vector>(this->Sf(), this->magSf(), faceMap);
-        
-//         mapNewInternalFaces<scalar>(faceMap);
-//         mapNewInternalFaces<vector>(faceMap);
-
-        // No oriented fields of more complex type
-        mapNewInternalFaces<sphericalTensor>(faceMap);
-        mapNewInternalFaces<symmTensor>(faceMap);
-        mapNewInternalFaces<tensor>(faceMap);
     }
 }
 
