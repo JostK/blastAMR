@@ -68,4 +68,6 @@ createBaseTurbulenceModel
 #include "kOmegaSSTJK.H"
 makeRASModel(kOmegaSSTJK);
 
+#include "kEpsilonPhitFBlast.H"
+makeRASModel(kEpsilonPhitFBlast);
 // ************************************************************************* //
