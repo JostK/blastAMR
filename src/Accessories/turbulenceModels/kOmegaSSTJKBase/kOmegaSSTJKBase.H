@@ -184,12 +184,15 @@ protected:
             Switch decayControl_;
             dimensionedScalar kInf_;
             dimensionedScalar omegaInf_;
+            
+            word productionType_;
 
 
     // Protected Member Functions
 
         void setDecayControl(const dictionary& dict);
-
+        
+        tmp<volScalarField> GbyNuMod(const volTensorField& gradU) const;
         virtual tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         virtual tmp<volScalarField> F2() const;
         virtual tmp<volScalarField> F3() const;

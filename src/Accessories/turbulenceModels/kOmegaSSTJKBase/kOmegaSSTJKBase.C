@@ -39,6 +39,34 @@ namespace Foam
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class BasicEddyViscosityModel>
+tmp<volScalarField> kOmegaSSTJKBase<BasicEddyViscosityModel>::GbyNuMod
+(
+    const volTensorField& gradU 
+) const
+{
+    if (productionType_ == "standard")
+    {
+        return (gradU && dev(twoSymm(gradU)));
+    }
+    else if (productionType_ == "KL")
+    {
+        return 2.0 * (mag(skew(gradU)) * mag(symm(gradU)));
+    }
+    else if (productionType_ == "V")
+    {
+        return 2.0 * magSqr(skew(gradU));
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unknown productionType: " << productionType_
+            << exit(FatalError);
+            
+        return nullptr;
+    }
+}
+
+template<class BasicEddyViscosityModel>
 tmp<volScalarField> kOmegaSSTJKBase<BasicEddyViscosityModel>::F1
 (
     const volScalarField& CDkOmega
@@ -423,12 +451,18 @@ kOmegaSSTJKBase<BasicEddyViscosityModel>::kOmegaSSTJKBase
             omega_.dimensions(),
             0
         )
+    ),
+    productionType_
+    (
+       "none"
     )
 {
     bound(k_, this->kMin_);
     bound(omega_, this->omegaMin_);
 
     setDecayControl(this->coeffDict_);
+    
+    productionType_ = this->coeffDict_.template getOrDefault<word>("productionType", "standard");
 }
 
 
@@ -478,6 +512,8 @@ bool kOmegaSSTJKBase<BasicEddyViscosityModel>::read()
         F3_.readIfPresent("F3", this->coeffDict());
 
         setDecayControl(this->coeffDict());
+        
+        productionType_ = this->coeffDict_.template getOrDefault<word>("productionType", "standard");
 
         return true;
     }
@@ -511,7 +547,7 @@ void kOmegaSSTJKBase<BasicEddyViscosityModel>::correct()
     volScalarField::Internal GbyNu0
     (
         this->type() + ":GbyNu",
-        (tgradU() && dev(twoSymm(tgradU())))
+        GbyNuMod(tgradU())
     );
     volScalarField::Internal G(this->GName(), nut*GbyNu0);
 
